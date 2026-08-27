@@ -4,8 +4,8 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    BuscaminasMain w;
-    w.show();
-    return QApplication::exec();
+    QApplication app(argc, argv);
+    BuscaminasMain ventana;
+    ventana.show();
+    return app.exec();
 }
