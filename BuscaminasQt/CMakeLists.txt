@@ -11,6 +11,9 @@ qt_add_executable(BuscaminasQt
     buscaminasmain.cpp
     buscaminasmain.h
     seleccionardificultad.h seleccionardificultad.cpp
+    registrousuario.h
+    RegistroUsuario.cpp
+
 )
 
 target_link_libraries(BuscaminasQt
