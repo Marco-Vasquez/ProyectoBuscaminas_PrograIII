@@ -9,7 +9,7 @@
 BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Buscaminas - Menú Principal");
-    resize(400, 380);
+    resize(700, 550);
     QWidget *widgetCentral = new QWidget(this);
     setCentralWidget(widgetCentral);
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(widgetCentral);

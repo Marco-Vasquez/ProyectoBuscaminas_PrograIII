@@ -11,7 +11,7 @@
 RegistroUsuario::RegistroUsuario(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Buscaminas - Registro de Usuario");
-    resize(400, 380);
+    resize(700, 550);
     QWidget *widgetCentral = new QWidget(this);
     setCentralWidget(widgetCentral);
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(widgetCentral);
