@@ -13,6 +13,8 @@ qt_add_executable(BuscaminasQt
     seleccionardificultad.h seleccionardificultad.cpp
     registrousuario.h
     RegistroUsuario.cpp
+    celda.h celda.cpp
+    tablero.h tablero.cpp
 
 )
 
