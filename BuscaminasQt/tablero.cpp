@@ -50,8 +50,7 @@ int Tablero::contarMinasAlrededor(int fila,int columna) const{
             int filaVecina,colVecina;
             filaVecina=fila+deltaFila;
             colVecina=columna+deltaColumna;
-            if(estaDentroDelTablero(filaVecina,colVecina)){
-                matriz[filaVecina][colVecina].tieneMina();
+            if(estaDentroDelTablero(filaVecina,colVecina) && matriz[filaVecina][colVecina].tieneMina()){
                 contador++;
             }
         }

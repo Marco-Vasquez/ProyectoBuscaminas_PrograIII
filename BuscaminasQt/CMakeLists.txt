@@ -15,6 +15,10 @@ qt_add_executable(BuscaminasQt
     RegistroUsuario.cpp
     celda.h celda.cpp
     tablero.h tablero.cpp
+    vistajuego.h
+    vistajuego.cpp
+    ventanajuego.h
+    ventanajuego.cpp
 
 )
 

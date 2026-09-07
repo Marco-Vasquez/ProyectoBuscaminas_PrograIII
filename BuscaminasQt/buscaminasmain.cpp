@@ -1,6 +1,7 @@
 #include "buscaminasmain.h"
 #include "seleccionardificultad.h"
 #include "registrousuario.h"
+#include "ventanajuego.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -46,8 +47,21 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     connect(botonRegistrarse, &QPushButton::clicked, this, [this]() { this->hide(); ventanaRegistroUsuario->show(); });
     connect(botonSalir, &QPushButton::clicked, this, &QMainWindow::close);
     connect(ventanaSeleccionDificultad, &SeleccionarDificultad::volverSolicitado, this, [this]() { ventanaSeleccionDificultad->hide(); this->show(); });
-    connect(ventanaSeleccionDificultad, &SeleccionarDificultad::dificultadSeleccionada, this, [](int cantidadFilas, int cantidadColumnas, int cantidadMinas) {});
-    connect(ventanaRegistroUsuario, &RegistroUsuario::volverSolicitado, this, [this]() { ventanaRegistroUsuario->hide(); this->show(); });
+    connect(ventanaSeleccionDificultad, &SeleccionarDificultad::dificultadSeleccionada, this,
+            [this](int cantidadFilas, int cantidadColumnas, int cantidadMinas) {
+                ventanaSeleccionDificultad->hide();
+                if (ventanaJuego) {
+                    ventanaJuego->close();
+                    ventanaJuego->deleteLater();
+                    ventanaJuego = nullptr;
+                }
+                ventanaJuego = new VentanaJuego(cantidadFilas, cantidadColumnas, cantidadMinas, this);
+                connect(ventanaJuego, &VentanaJuego::volverSolicitado, this, [this]() {
+                    ventanaJuego->hide();
+                    this->show();
+                });
+                ventanaJuego->show();
+            });    connect(ventanaRegistroUsuario, &RegistroUsuario::volverSolicitado, this, [this]() { ventanaRegistroUsuario->hide(); this->show(); });
     connect(ventanaRegistroUsuario, &RegistroUsuario::registroCompletado, this, [this](QString nombreUsuario) {
         ventanaRegistroUsuario->hide();
         this->show();

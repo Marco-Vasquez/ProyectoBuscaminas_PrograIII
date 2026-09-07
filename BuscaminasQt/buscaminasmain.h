@@ -3,6 +3,7 @@
 #include <QMainWindow>
 class SeleccionarDificultad;
 class RegistroUsuario;
+class VentanaJuego;
 class BuscaminasMain : public QMainWindow
 {
     Q_OBJECT
@@ -12,5 +13,6 @@ public:
 private:
     SeleccionarDificultad *ventanaSeleccionDificultad = nullptr;
     RegistroUsuario *ventanaRegistroUsuario = nullptr;
+    VentanaJuego *ventanaJuego = nullptr;
 };
 #endif // BUSCAMINASMAIN_H
