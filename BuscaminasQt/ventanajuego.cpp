@@ -2,19 +2,15 @@
 #include "vistajuego.h"
 #include "tablero.h"
 #include "celda.h"
+#include "celdagrafica.h"
 
 #include <QGraphicsScene>
-#include <QGraphicsRectItem>
-#include <QGraphicsSimpleTextItem>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QWidget>
 #include <QMessageBox>
 #include <QFont>
-#include <QBrush>
-#include <QPen>
-#include <QColor>
 
 VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *parent)
     : QMainWindow(parent), partidaTerminada(false)
@@ -55,57 +51,55 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     connect(vista, &VistaJuego::celdaClicIzquierdo, this, &VentanaJuego::manejarClicIzquierdo);
     connect(vista, &VistaJuego::celdaClicDerecho, this, &VentanaJuego::manejarClicDerecho);
 
+    construirCeldasGraficas();
     dibujarTablero();
 }
 
 VentanaJuego::~VentanaJuego()
 {
+    //celdasGraficas no se borra celda por celda, como cada celdagrafica ya es
+    //propiedad de escena, y Qt la destruye sola
+    //Acá solo liberamos el arreglo de punteros que armamos nosotros
+    delete[] celdasGraficas;
     delete tablero;
+}
+
+void VentanaJuego::construirCeldasGraficas()
+{
+    int filas = tablero->getFilas();
+    int columnas = tablero->getColumnas();
+
+    celdasGraficas = new celdagrafica*[filas * columnas];
+
+    for (int fila = 0; fila < filas; fila++) {
+        for (int columna = 0; columna < columnas; columna++) {
+            int indice = fila * columnas + columna;
+            celdagrafica *item = new celdagrafica(fila, columna, TAMANIO_CELDA);
+            item->setPos(columna * TAMANIO_CELDA, fila * TAMANIO_CELDA);
+            //VistaJuego ya captura los clics y calcula fila/columna a mano,
+            //así que le apagamos la captura propia a cada celda para no
+            //manejar el mismo clic dos veces
+            item->setAcceptedMouseButtons(Qt::NoButton);
+            escena->addItem(item);
+            celdasGraficas[indice] = item;
+        }
+    }
+
+    escena->setSceneRect(0, 0, columnas * TAMANIO_CELDA, filas * TAMANIO_CELDA);
 }
 
 void VentanaJuego::dibujarTablero()
 {
-    escena->clear();
-
     int filas = tablero->getFilas();
     int columnas = tablero->getColumnas();
 
     for (int fila = 0; fila < filas; fila++) {
         for (int columna = 0; columna < columnas; columna++) {
+            int indice = fila * columnas + columna;
             Celda &celda = tablero->obtenerCelda(fila, columna);
-            qreal x = columna * TAMANIO_CELDA;
-            qreal y = fila * TAMANIO_CELDA;
-
-            QColor colorFondo;
-            QString texto;
-
-            if (celda.estaRevelada()) {
-                if (celda.tieneMina()) {
-                    colorFondo = QColor("#e74c3c");
-                    texto = "*";
-                } else {
-                    colorFondo = QColor("#ecf0f1");
-                    if (celda.getMinasVecinas() > 0) {
-                        texto = QString::number(celda.getMinasVecinas());
-                    }
-                }
-            } else if (celda.tieneBandera()) {
-                colorFondo = QColor("#f1c40f");
-                texto = "B";
-            } else {
-                colorFondo = QColor("#95a5a6");
-            }
-
-            escena->addRect(x, y, TAMANIO_CELDA, TAMANIO_CELDA, QPen(Qt::black), QBrush(colorFondo));
-
-            if (!texto.isEmpty()) {
-                QGraphicsSimpleTextItem *itemTexto = escena->addSimpleText(texto);
-                itemTexto->setPos(x + TAMANIO_CELDA / 2.0 - 5, y + TAMANIO_CELDA / 2.0 - 9);
-            }
+            celdasGraficas[indice]->actualizarDesdeCelda(celda);
         }
     }
-
-    escena->setSceneRect(0, 0, columnas * TAMANIO_CELDA, filas * TAMANIO_CELDA);
 
     if (!partidaTerminada) {
         etiquetaEstado->setText(QString("Minas: %1").arg(tablero->getCantidadMinas()));
