@@ -6,25 +6,30 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QStackedWidget>
 #include <QFont>
+
 BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Buscaminas - Menú Principal");
     resize(700, 550);
-    QWidget *widgetCentral = new QWidget(this);
-    setCentralWidget(widgetCentral);
-    QVBoxLayout *layoutPrincipal = new QVBoxLayout(widgetCentral);
+
+    panelPrincipal = new QStackedWidget(this);
+    setCentralWidget(panelPrincipal);
+
+    pantallaMenu = new QWidget(panelPrincipal);
+    QVBoxLayout *layoutPrincipal = new QVBoxLayout(pantallaMenu);
     layoutPrincipal->setContentsMargins(40, 40, 40, 40);
     layoutPrincipal->setSpacing(15);
-    QLabel *etiquetaTitulo = new QLabel("BUSCAMINAS", widgetCentral);
+    QLabel *etiquetaTitulo = new QLabel("BUSCAMINAS", pantallaMenu);
     QFont fuenteTitulo = etiquetaTitulo->font();
     fuenteTitulo.setPointSize(24);
     fuenteTitulo.setBold(true);
     etiquetaTitulo->setFont(fuenteTitulo);
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
-    QPushButton *botonJugar = new QPushButton("JUGAR", widgetCentral);
-    QPushButton *botonRegistrarse = new QPushButton("REGISTRARSE", widgetCentral);
-    QPushButton *botonSalir = new QPushButton("SALIR", widgetCentral);
+    QPushButton *botonJugar = new QPushButton("JUGAR", pantallaMenu);
+    QPushButton *botonRegistrarse = new QPushButton("REGISTRARSE", pantallaMenu);
+    QPushButton *botonSalir = new QPushButton("SALIR", pantallaMenu);
     for (QPushButton *boton : {botonJugar, botonRegistrarse, botonSalir}) {
         boton->setMinimumHeight(55);
         QFont fuenteBoton = boton->font();
@@ -41,30 +46,39 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     layoutPrincipal->addWidget(botonRegistrarse);
     layoutPrincipal->addWidget(botonSalir);
     layoutPrincipal->addStretch();
-    ventanaSeleccionDificultad = new SeleccionarDificultad(this);
-    ventanaRegistroUsuario = new RegistroUsuario(this);
-    connect(botonJugar, &QPushButton::clicked, this, [this]() { this->hide(); ventanaSeleccionDificultad->show(); });
-    connect(botonRegistrarse, &QPushButton::clicked, this, [this]() { this->hide(); ventanaRegistroUsuario->show(); });
+
+    ventanaSeleccionDificultad = new SeleccionarDificultad(panelPrincipal);
+    ventanaRegistroUsuario = new RegistroUsuario(panelPrincipal);
+
+    panelPrincipal->addWidget(pantallaMenu);
+    panelPrincipal->addWidget(ventanaSeleccionDificultad);
+    panelPrincipal->addWidget(ventanaRegistroUsuario);
+    panelPrincipal->setCurrentWidget(pantallaMenu);
+
+    connect(botonJugar, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaSeleccionDificultad); });
+    connect(botonRegistrarse, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaRegistroUsuario); });
     connect(botonSalir, &QPushButton::clicked, this, &QMainWindow::close);
-    connect(ventanaSeleccionDificultad, &SeleccionarDificultad::volverSolicitado, this, [this]() { ventanaSeleccionDificultad->hide(); this->show(); });
+
+    connect(ventanaSeleccionDificultad, &SeleccionarDificultad::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
     connect(ventanaSeleccionDificultad, &SeleccionarDificultad::dificultadSeleccionada, this,
             [this](int cantidadFilas, int cantidadColumnas, int cantidadMinas) {
-                ventanaSeleccionDificultad->hide();
                 if (ventanaJuego) {
-                    ventanaJuego->close();
+                    panelPrincipal->removeWidget(ventanaJuego);
                     ventanaJuego->deleteLater();
                     ventanaJuego = nullptr;
                 }
-                ventanaJuego = new VentanaJuego(cantidadFilas, cantidadColumnas, cantidadMinas, this);
+                ventanaJuego = new VentanaJuego(cantidadFilas, cantidadColumnas, cantidadMinas, panelPrincipal);
                 connect(ventanaJuego, &VentanaJuego::volverSolicitado, this, [this]() {
-                    ventanaJuego->hide();
-                    this->show();
+                    panelPrincipal->setCurrentWidget(pantallaMenu);
                 });
-                ventanaJuego->show();
-            });    connect(ventanaRegistroUsuario, &RegistroUsuario::volverSolicitado, this, [this]() { ventanaRegistroUsuario->hide(); this->show(); });
+                panelPrincipal->addWidget(ventanaJuego);
+                panelPrincipal->setCurrentWidget(ventanaJuego);
+            });
+
+    connect(ventanaRegistroUsuario, &RegistroUsuario::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
     connect(ventanaRegistroUsuario, &RegistroUsuario::registroCompletado, this, [this](QString nombreUsuario) {
-        ventanaRegistroUsuario->hide();
-        this->show();
+        panelPrincipal->setCurrentWidget(pantallaMenu);
     });
 }
+
 BuscaminasMain::~BuscaminasMain() {}

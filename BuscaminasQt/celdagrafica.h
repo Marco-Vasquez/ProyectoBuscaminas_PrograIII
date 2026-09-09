@@ -19,6 +19,10 @@ private:
     int fila,columna,minasVecinas;
     qreal size;
     bool mina,revelada,bandera;
+
+    // Dibujan la mina y la bandera con formas vectoriales
+    void dibujarMina(QPainter *painter, const QRectF &rectangulo) const;
+    void dibujarBandera(QPainter *painter, const QRectF &rectangulo) const;
 };
 
 #endif // CELDAGRAFICA_H

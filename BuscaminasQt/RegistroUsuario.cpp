@@ -3,35 +3,30 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QWidget>
 #include <QFont>
 #include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
-RegistroUsuario::RegistroUsuario(QWidget *parent) : QMainWindow(parent)
+RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
 {
-    setWindowTitle("Buscaminas - Registro de Usuario");
-    resize(700, 550);
-    QWidget *widgetCentral = new QWidget(this);
-    setCentralWidget(widgetCentral);
-    QVBoxLayout *layoutPrincipal = new QVBoxLayout(widgetCentral);
+    QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
     layoutPrincipal->setContentsMargins(40, 30, 40, 30);
     layoutPrincipal->setSpacing(12);
-    QLabel *etiquetaTitulo = new QLabel("REGISTRO DE USUARIO", widgetCentral);
+    QLabel *etiquetaTitulo = new QLabel("REGISTRO DE USUARIO", this);
     QFont fuenteTitulo = etiquetaTitulo->font();
     fuenteTitulo.setPointSize(18);
     fuenteTitulo.setBold(true);
     etiquetaTitulo->setFont(fuenteTitulo);
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
-    QLineEdit *campoUsuario = new QLineEdit(widgetCentral);
+    QLineEdit *campoUsuario = new QLineEdit(this);
     campoUsuario->setPlaceholderText("Nombre de usuario");
-    QLineEdit *campoContrasena = new QLineEdit(widgetCentral);
+    QLineEdit *campoContrasena = new QLineEdit(this);
     campoContrasena->setPlaceholderText("Contraseña");
     campoContrasena->setEchoMode(QLineEdit::Password);
-    QPushButton *botonMostrarContrasena = new QPushButton("Mostrar contraseña", widgetCentral);
+    QPushButton *botonMostrarContrasena = new QPushButton("Mostrar contraseña", this);
     botonMostrarContrasena->setCheckable(true);
-    QPushButton *botonRegistrar = new QPushButton("REGISTRARSE", widgetCentral);
-    QPushButton *botonVolver = new QPushButton("← VOLVER", widgetCentral);
+    QPushButton *botonRegistrar = new QPushButton("REGISTRARSE", this);
+    QPushButton *botonVolver = new QPushButton("← VOLVER", this);
     for (QLineEdit *campo : {campoUsuario, campoContrasena}) campo->setMinimumHeight(40);
     for (QPushButton *boton : {botonRegistrar, botonVolver}) boton->setMinimumHeight(50);
     botonRegistrar->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");

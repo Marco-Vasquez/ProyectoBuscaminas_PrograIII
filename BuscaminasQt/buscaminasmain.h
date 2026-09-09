@@ -1,6 +1,7 @@
 #ifndef BUSCAMINASMAIN_H
 #define BUSCAMINASMAIN_H
 #include <QMainWindow>
+class QStackedWidget;
 class SeleccionarDificultad;
 class RegistroUsuario;
 class VentanaJuego;
@@ -11,6 +12,8 @@ public:
     explicit BuscaminasMain(QWidget *parent = nullptr);
     ~BuscaminasMain() override;
 private:
+    QStackedWidget *panelPrincipal = nullptr;
+    QWidget *pantallaMenu = nullptr;
     SeleccionarDificultad *ventanaSeleccionDificultad = nullptr;
     RegistroUsuario *ventanaRegistroUsuario = nullptr;
     VentanaJuego *ventanaJuego = nullptr;

@@ -1,5 +1,7 @@
 #include "vistajuego.h"
 #include <QMouseEvent>
+#include <QResizeEvent>
+#include <QGraphicsScene>
 
 VistaJuego::VistaJuego(QWidget *parent)
     : QGraphicsView(parent), tamanioCelda(32)
@@ -28,4 +30,15 @@ void VistaJuego::mousePressEvent(QMouseEvent *evento)
     }
 
     QGraphicsView::mousePressEvent(evento);
+}
+
+void VistaJuego::resizeEvent(QResizeEvent *evento)
+{
+    QGraphicsView::resizeEvent(evento);
+
+    // Reajusta el zoom del tablero para que siempre quepa completo dentro
+    // mapToScene() en mousePressEvent ya tiene en cuenta este zoom
+    if (scene()) {
+        fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
+    }
 }

@@ -1,7 +1,7 @@
 #ifndef SELECCIONARDIFICULTAD_H
 #define SELECCIONARDIFICULTAD_H
-#include <QMainWindow>
-class SeleccionarDificultad : public QMainWindow
+#include <QWidget>
+class SeleccionarDificultad : public QWidget
 {
     Q_OBJECT
 public:

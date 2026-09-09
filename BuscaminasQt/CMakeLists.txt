@@ -22,6 +22,8 @@ qt_add_executable(BuscaminasQt
     celdagrafica.h celdagrafica.cpp
     cronometro.h cronometro.cpp
     gestorpuntajes.h gestorpuntajes.cpp
+    ventanarecords.h
+    ventanarecords.cpp
 
 )
 

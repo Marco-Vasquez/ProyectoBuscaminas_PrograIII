@@ -1,7 +1,7 @@
 #ifndef REGISTROUSUARIO_H
 #define REGISTROUSUARIO_H
-#include <QMainWindow>
-class RegistroUsuario : public QMainWindow
+#include <QWidget>
+class RegistroUsuario : public QWidget
 {
     Q_OBJECT
 public:

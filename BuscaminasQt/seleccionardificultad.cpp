@@ -2,27 +2,22 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QWidget>
 #include <QFont>
-SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QMainWindow(parent)
+SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
 {
-    setWindowTitle("Buscaminas - Seleccionar Dificultad");
-    resize(700, 550);
-    QWidget *widgetCentral = new QWidget(this);
-    setCentralWidget(widgetCentral);
-    QVBoxLayout *layoutPrincipal = new QVBoxLayout(widgetCentral);
+    QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
     layoutPrincipal->setContentsMargins(40, 30, 40, 30);
     layoutPrincipal->setSpacing(12);
-    QLabel *etiquetaTitulo = new QLabel("SELECCIONAR DIFICULTAD", widgetCentral);
+    QLabel *etiquetaTitulo = new QLabel("SELECCIONAR DIFICULTAD", this);
     QFont fuenteTitulo = etiquetaTitulo->font();
     fuenteTitulo.setPointSize(18);
     fuenteTitulo.setBold(true);
     etiquetaTitulo->setFont(fuenteTitulo);
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
-    QPushButton *botonFacil = new QPushButton("FÁCIL\n8x8 · 10 minas", widgetCentral);
-    QPushButton *botonMedio = new QPushButton("MEDIO\n16x16 · 40 minas", widgetCentral);
-    QPushButton *botonDificil = new QPushButton("DIFÍCIL\n16x30 · 99 minas", widgetCentral);
-    QPushButton *botonVolver = new QPushButton("← VOLVER", widgetCentral);
+    QPushButton *botonFacil = new QPushButton("FÁCIL\n8x8 · 10 minas", this);
+    QPushButton *botonMedio = new QPushButton("MEDIO\n16x16 · 40 minas", this);
+    QPushButton *botonDificil = new QPushButton("DIFÍCIL\n16x30 · 99 minas", this);
+    QPushButton *botonVolver = new QPushButton("← VOLVER", this);
     for (QPushButton *boton : {botonFacil, botonMedio, botonDificil, botonVolver}) {
         boton->setMinimumHeight(55);
         QFont fuenteBoton = boton->font();
