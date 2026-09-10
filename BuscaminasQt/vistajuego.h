@@ -3,8 +3,8 @@
 
 #include <QGraphicsView>
 
-// Vista encargada de capturar clics del mouse sobre la escena y
-// traducirlos a coordenadas de fila/columna del Tablero, y de reescalar
+// captura clics del mouse sobre la escena
+// traduce a coordenadas de fila/columna del Tablero..y reescala
 class VistaJuego : public QGraphicsView
 {
     Q_OBJECT

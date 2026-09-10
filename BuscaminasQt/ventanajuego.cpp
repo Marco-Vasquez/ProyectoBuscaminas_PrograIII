@@ -20,9 +20,8 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
 {
     tablero = new Tablero(filas, columnas, cantidadMinas);
 
-    // El tamaño de cada celda se calcula para que el tablero completo
-    // siempre entre en la misma área disponible, sin importar si el nivel
-    // es 8x8, 16x16 o 16x30.
+    //tamaño de cada celda se calcula para que el tablero completo
+    // siempre entre en la misma área
     int celdaPorAncho = ANCHO_AREA_TABLERO / columnas;
     int celdaPorAlto = ALTO_AREA_TABLERO / filas;
     tamanioCelda = std::min(celdaPorAncho, celdaPorAlto);
