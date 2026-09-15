@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QFont>
 #include <QString>
+#include <QEvent>
 
 VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
 {
@@ -20,32 +21,53 @@ VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
     layoutPrincipal->addWidget(etiquetaTitulo);
 
-    GestorPuntajes gestorPuntajes;
-    gestorPuntajes.cargarPuntajes();
-    int cantidad = gestorPuntajes.getCantidadRegistros();
+    //es un layout aparte para vaciar/reconstruir esta pantalla sin tocar el titulo ni el botón volver
+    layoutRegistros=new QVBoxLayout();
+    layoutPrincipal->addLayout(layoutRegistros);
 
-    if (cantidad == 0) {
-        QLabel *etiquetaVacio = new QLabel("Todavía no hay puntajes guardados.", this);
-        etiquetaVacio->setAlignment(Qt::AlignCenter);
-        layoutPrincipal->addWidget(etiquetaVacio);
-    } else {
-        for (int i = 0; i < cantidad; i++) {
-            const RegistroPuntaje &registro = gestorPuntajes.obtenerRegistro(i);
-            QString texto = QString("%1 — %2s — %3")
-                                .arg(QString::fromStdString(registro.nombreJugador))
-                                .arg(registro.segundos)
-                                .arg(QString::fromStdString(registro.dificultad));
-            QLabel *etiquetaRegistro = new QLabel(texto, this);
-            layoutPrincipal->addWidget(etiquetaRegistro);
-        }
-    }
-
-    QPushButton *botonVolver = new QPushButton("← VOLVER", this);
-    botonVolver->setStyleSheet("background-color: #95a5a6; color: white; border-radius: 6px;");
-    connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
+    QPushButton *botonVolver=new QPushButton("<- VOLVER",this);
+    botonVolver->setStyleSheet("background-color: #95a5a6;color:white;border-radius:6px");
+    connect(botonVolver,&QPushButton::clicked,this,[this](){
+        emit volverSolicitado();
+    });
 
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonVolver);
+
+    actualizarRecords();
 }
 
 VentanaRecords::~VentanaRecords() {}
+
+void VentanaRecords::showEvent(QShowEvent *evento){
+    QWidget::showEvent(evento);
+    actualizarRecords();
+}
+
+void VentanaRecords::actualizarRecords(){
+    //se borran las filas de la vez anterior antes de recargar el archivo
+    //de esta manera siempre los puntajes mas recientes se muestran
+    QLayoutItem *item;
+    while((item=layoutRegistros->takeAt(0))!=nullptr){
+        delete item->widget();
+        delete item;
+    }
+    GestorPuntajes gestorPuntajes;
+    gestorPuntajes.cargarPuntajes();
+    int cantidad=gestorPuntajes.getCantidadRegistros();
+    if(cantidad==0){
+        QLabel *etiquetaVacio=new QLabel("Todavía no hay puntajes guardados",this);
+        etiquetaVacio->setAlignment(Qt::AlignCenter);
+        layoutRegistros->addWidget(etiquetaVacio);
+        return;
+    }
+    for(int i=0;i<cantidad;i++){
+        const RegistroPuntaje &registro=gestorPuntajes.obtenerRegistro(i);
+        QString texto=QString("%1 — %2s — %3")
+                            .arg(QString::fromStdString(registro.nombreJugador))
+                            .arg(registro.segundos)
+                            .arg(QString::fromStdString(registro.dificultad));
+        QLabel *etiquetaRegistro=new QLabel(texto,this);
+        layoutRegistros->addWidget(etiquetaRegistro);
+    }
+}

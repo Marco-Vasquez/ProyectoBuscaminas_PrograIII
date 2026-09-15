@@ -5,6 +5,7 @@ class QStackedWidget;
 class SeleccionarDificultad;
 class RegistroUsuario;
 class VentanaJuego;
+class VentanaRecords;
 class BuscaminasMain : public QMainWindow
 {
     Q_OBJECT
@@ -17,5 +18,7 @@ private:
     SeleccionarDificultad *ventanaSeleccionDificultad = nullptr;
     RegistroUsuario *ventanaRegistroUsuario = nullptr;
     VentanaJuego *ventanaJuego = nullptr;
+    VentanaRecords *ventanaRecords=nullptr;
+    QString nombreUsuarioActual="Jugador";
 };
 #endif // BUSCAMINASMAIN_H
