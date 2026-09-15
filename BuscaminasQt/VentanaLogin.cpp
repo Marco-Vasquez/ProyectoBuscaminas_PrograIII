@@ -36,6 +36,7 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     botonMostrarContrasena->setCheckable(true);
     QPushButton *botonIngresar = new QPushButton("INGRESAR", this);
     QPushButton *botonIrARegistro = new QPushButton("¿No tenés cuenta? Regístrate", this);
+    QPushButton *botonSalir=new QPushButton("SALIR",this);
 
     for (QLineEdit *campo : {campoUsuario, campoContrasena}) {
         campo->setMinimumHeight(40);
@@ -44,6 +45,7 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
 
     botonIngresar->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
     botonIrARegistro->setStyleSheet("background-color: transparent; color: #3498db; border: none;");
+    botonSalir->setStyleSheet("background-color: #e74c3c; color: white; border-radius: 6px");
 
     connect(botonMostrarContrasena, &QPushButton::toggled, this, [this, botonMostrarContrasena](bool marcado) {
         campoContrasena->setEchoMode(marcado ? QLineEdit::Normal : QLineEdit::Password);
@@ -72,6 +74,7 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     });
 
     connect(botonIrARegistro, &QPushButton::clicked, this, [this]() { emit registroSolicitado(); });
+    connect(botonSalir, &QPushButton::clicked, this, [this]() { emit salirSolicitado(); });
 
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(etiquetaTitulo);
@@ -83,6 +86,8 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     layoutPrincipal->addWidget(etiquetaError);
     layoutPrincipal->addWidget(botonIngresar);
     layoutPrincipal->addWidget(botonIrARegistro);
+    layoutPrincipal->addSpacing(10);
+    layoutPrincipal->addWidget(botonSalir);
     layoutPrincipal->addStretch();
 }
 

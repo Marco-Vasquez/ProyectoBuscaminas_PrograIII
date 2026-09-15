@@ -7,6 +7,8 @@ class RegistroUsuario;
 class VentanaJuego;
 class VentanaRecords;
 class VentanaLogin;
+class QLabel;
+class VentanaVictoria;
 class BuscaminasMain : public QMainWindow
 {
     Q_OBJECT
@@ -21,6 +23,14 @@ private:
     RegistroUsuario *ventanaRegistroUsuario = nullptr;
     VentanaJuego *ventanaJuego = nullptr;
     VentanaRecords *ventanaRecords=nullptr;
+    QLabel *etiquetaMedallaBronce=nullptr;
+    QLabel *etiquetaMedallaPlata=nullptr;
+    QLabel *etiquetaMedallaOro=nullptr;
+    QLabel *etiquetaMedallaDiamante=nullptr;
+    QLabel *etiquetaSesion=nullptr;
+    VentanaVictoria *ventanaVictoria=nullptr;
+    void abrirPartida(int filas,int columnas,int minas);
+    void actualizarMedallas();
     QString nombreUsuarioActual="Jugador";
 };
 #endif // BUSCAMINASMAIN_H

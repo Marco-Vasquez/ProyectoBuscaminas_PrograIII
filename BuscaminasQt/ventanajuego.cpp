@@ -4,7 +4,10 @@
 #include "celda.h"
 #include "celdagrafica.h"
 #include "gestorpuntajes.h"
+#include "gestormedallas.h"
+#include "indicadoricono.h"
 
+#include <QHBoxLayout>
 #include <QGraphicsScene>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -35,16 +38,27 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
 
     QHBoxLayout *layoutEncabezado = new QHBoxLayout();
 
+    etiquetaJugador=new QLabel(QString("Jugador: %1").arg(nombreJugador),this);
     etiquetaEstado = new QLabel(this);
+    etiquetaBanderas=new QLabel(this);
     etiquetaTiempo = new QLabel("Tiempo: 0s", this);
-    for (QLabel *etiqueta : {etiquetaEstado, etiquetaTiempo}) {
+    for (QLabel *etiqueta : {etiquetaJugador, etiquetaEstado, etiquetaBanderas, etiquetaTiempo}) {
         QFont fuenteEstado = etiqueta->font();
-        fuenteEstado.setPointSize(11);
+        fuenteEstado.setPointSize(10);
         fuenteEstado.setBold(true);
         etiqueta->setFont(fuenteEstado);
     }
 
+    IndicadorIcono *iconoMina=new IndicadorIcono(TipoIcono::Mina,this);
+    IndicadorIcono *iconoBandera=new IndicadorIcono(TipoIcono::Bandera,this);
+
+    layoutEncabezado->addWidget(etiquetaJugador);
+    layoutEncabezado->addStretch();
+    layoutEncabezado->addWidget(iconoMina);
     layoutEncabezado->addWidget(etiquetaEstado);
+    layoutEncabezado->addSpacing(15);
+    layoutEncabezado->addWidget(iconoBandera);
+    layoutEncabezado->addWidget(etiquetaBanderas);
     layoutEncabezado->addStretch();
     layoutEncabezado->addWidget(etiquetaTiempo);
 
@@ -87,6 +101,7 @@ VentanaJuego::~VentanaJuego()
 void VentanaJuego::setNombreJugador(const QString &nombre)
 {
     nombreJugador = nombre;
+    etiquetaJugador->setText(QString("Jugador: %1").arg(nombre));
 }
 
 void VentanaJuego::construirCeldasGraficas()
@@ -125,6 +140,7 @@ void VentanaJuego::dibujarTablero()
 
     if (!partidaTerminada) {
         etiquetaEstado->setText(QString("Minas: %1").arg(tablero->getCantidadMinas()));
+        etiquetaBanderas->setText(QString("Banderas: %1").arg(tablero->getCantidadMinas() - tablero->getBanderasColocadas()));
     }
 }
 
@@ -167,14 +183,44 @@ void VentanaJuego::finalizarPartida(bool gano)
 
     if (gano) {
         int segundos = cronometro.getSegundosTranscurridos();
+        int banderas = tablero->getBanderasColocadas();
         QString dificultadTexto = QString("%1x%2").arg(tablero->getFilas()).arg(tablero->getColumnas());
 
         GestorPuntajes gestorPuntajes;
         gestorPuntajes.guardarPuntaje(nombreJugador.toStdString(), segundos, dificultadTexto.toStdString());
 
-        QMessageBox::information(this, "Victoria",
-                                 QString("¡Felicidades! Encontraste todas las celdas seguras en %1 segundos.").arg(segundos));
+        QString medalla = determinarMedalla();
+        GestorMedallas gestorMedallas;
+        bool medallaOtorgada = gestorMedallas.otorgarMedalla(nombreJugador.toStdString(), medalla.toStdString());
+        QString textoMedalla = medallaOtorgada
+                                   ? QString("Medalla obtenida: %1").arg(medalla)
+                                   : QString("Todavía no desbloqueaste la medalla %1 (completá el nivel anterior primero)").arg(medalla);
+
+        int filas = tablero->getFilas(), columnas = tablero->getColumnas(), minas = tablero->getCantidadMinas();
+        bool haySiguiente = true;
+        int filasSig = 0, columnasSig = 0, minasSig = 0;
+        if (filas == 8 && columnas == 8 && minas == 10) { filasSig = 16; columnasSig = 16; minasSig = 40; }
+        else if (filas == 16 && columnas == 16 && minas == 40) { filasSig = 16; columnasSig = 30; minasSig = 99; }
+        else { haySiguiente = false; }
+
+        emit victoriaObtenida(segundos, banderas, textoMedalla, haySiguiente, filasSig, columnasSig, minasSig);
     } else {
         QMessageBox::information(this, "Derrota", "Abriste una mina. Intenta de nuevo.");
     }
+}
+QString VentanaJuego::determinarMedalla() const{
+    int filas,columnas,minas;
+    filas=tablero->getFilas();
+    columnas=tablero->getColumnas();
+    minas=tablero->getCantidadMinas();
+    if(filas==8 && columnas==8 && minas==10){
+        return "Bronce";
+    }
+    if(filas==16 && columnas==16 && minas==40){
+        return "Plata";
+    }
+    if(filas==16 && columnas==30 && minas==99){
+        return "Oro";
+    }
+    return "Diamante"; //para nivel personalizado
 }

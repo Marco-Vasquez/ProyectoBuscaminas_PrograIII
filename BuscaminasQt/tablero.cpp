@@ -2,7 +2,7 @@
 #include <random>
 using namespace std;
 Tablero::Tablero(int filas,int columnas,int cantMinas)
-    :filas(filas),columnas(columnas),cantMinas(cantMinas),minasSembradas(false),perdio(false)
+    :filas(filas),columnas(columnas),cantMinas(cantMinas),minasSembradas(false),perdio(false),banderasColocadas(0)
 {
     matriz=new Celda* [filas];
     for(int i=0;i<filas;i++){
@@ -98,13 +98,25 @@ void Tablero::alternarBandera(int fila,int columna){
     if(!estaDentroDelTablero(fila,columna)){
         return;
     }
-    matriz[fila][columna].alternarBandera();
+    Celda &celda=matriz[fila][columna];
+    bool teniaAntes=celda.tieneBandera();
+    celda.alternarBandera();
+    bool tieneAhora=celda.tieneBandera();
+    if(!teniaAntes && tieneAhora){
+        banderasColocadas++;
+    }
+    else if(teniaAntes && !tieneAhora){
+        banderasColocadas--;
+    }
 }
 int Tablero::getColumnas() const{
     return columnas;
 }
 int Tablero::getFilas() const{
     return filas;
+}
+int Tablero::getBanderasColocadas() const{
+    return banderasColocadas;
 }
 int Tablero::getCantidadMinas() const{
     return cantMinas;

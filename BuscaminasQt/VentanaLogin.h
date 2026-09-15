@@ -21,6 +21,7 @@ public:
 signals:
     void loginExitoso(QString nombreUsuario);
     void registroSolicitado();
+    void salirSolicitado();
 
 private:
     QLineEdit *campoUsuario;

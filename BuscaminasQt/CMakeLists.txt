@@ -26,6 +26,10 @@ qt_add_executable(BuscaminasQt
     ventanarecords.cpp
     VentanaLogin.h
     VentanaLogin.cpp
+    gestormedallas.h gestormedallas.cpp
+    indicadoricono.h indicadoricono.cpp
+    ventanavictoria.h ventanavictoria.cpp
+
 
 )
 

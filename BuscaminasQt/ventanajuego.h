@@ -19,6 +19,7 @@ public:
     void setNombreJugador(const QString &nombre);
 signals:
     void volverSolicitado();
+    void victoriaObtenida(int segundos,int banderasColocadas,QString textoMedalla,bool haySiguienteNivel,int filasSiguiente,int columnasSiguiente,int minasSiguiente);
 private slots:
     void manejarClicIzquierdo(int fila, int columna);
     void manejarClicDerecho(int fila, int columna);
@@ -32,6 +33,8 @@ private:
     VistaJuego *vista;
     QLabel *etiquetaEstado;
     QLabel *etiquetaTiempo;
+    QLabel *etiquetaJugador;
+    QLabel *etiquetaBanderas;
     celdagrafica **celdasGraficas;
     Cronometro cronometro;
     QString nombreJugador;
@@ -41,5 +44,6 @@ private:
     void construirCeldasGraficas();
     void dibujarTablero();
     void finalizarPartida(bool gano);
+    QString determinarMedalla() const;
 };
 #endif // VENTANAJUEGO_H

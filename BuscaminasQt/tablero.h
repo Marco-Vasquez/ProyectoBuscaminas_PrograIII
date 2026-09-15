@@ -15,6 +15,7 @@ public:
     int getCantidadMinas() const;
     bool juegoPerdido() const;
     bool juegoGanado() const;
+    int getBanderasColocadas() const;
 private:
     Celda** matriz;
     int filas,columnas,cantMinas;
@@ -22,6 +23,7 @@ private:
     void sembrarMinas(int filaSegura,int columnaSegura);
     void calcularMinasVecinas();
     int contarMinasAlrededor(int fila,int columna) const;
+    int banderasColocadas;
 };
 
 #endif // TABLERO_H
