@@ -24,6 +24,8 @@ qt_add_executable(BuscaminasQt
     gestorpuntajes.h gestorpuntajes.cpp
     ventanarecords.h
     ventanarecords.cpp
+    VentanaLogin.h
+    VentanaLogin.cpp
 
 )
 

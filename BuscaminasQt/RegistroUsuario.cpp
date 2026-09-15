@@ -4,7 +4,6 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QFont>
-#include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
 RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
@@ -23,6 +22,11 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
     QLineEdit *campoContrasena = new QLineEdit(this);
     campoContrasena->setPlaceholderText("Contraseña");
     campoContrasena->setEchoMode(QLineEdit::Password);
+    etiquetaError = new QLabel(this);
+    etiquetaError->setStyleSheet("color: #e74c3c;");
+    etiquetaError->setWordWrap(true);
+    etiquetaError->setAlignment(Qt::AlignCenter);
+    etiquetaError->hide();
     QPushButton *botonMostrarContrasena = new QPushButton("Mostrar contraseña", this);
     botonMostrarContrasena->setCheckable(true);
     QPushButton *botonRegistrar = new QPushButton("REGISTRARSE", this);
@@ -39,7 +43,8 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
         QString nombreUsuario = campoUsuario->text().trimmed();
         QString contrasena = campoContrasena->text();
         if (nombreUsuario.isEmpty() || contrasena.isEmpty()) {
-            QMessageBox::warning(this, "Campos incompletos", "Debés ingresar usuario y contraseña.");
+            etiquetaError->setText("Debés ingresar usuario y contraseña.");
+            etiquetaError->show();
             return;
         }
         QFile archivo("usuarios.txt");
@@ -50,6 +55,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
         }
         campoUsuario->clear();
         campoContrasena->clear();
+        etiquetaError->hide();
         emit registroCompletado(nombreUsuario);
     });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
@@ -59,6 +65,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
     layoutPrincipal->addWidget(campoContrasena);
     layoutPrincipal->addWidget(botonMostrarContrasena);
     layoutPrincipal->addSpacing(10);
+    layoutPrincipal->addWidget(etiquetaError);
     layoutPrincipal->addWidget(botonRegistrar);
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonVolver);
