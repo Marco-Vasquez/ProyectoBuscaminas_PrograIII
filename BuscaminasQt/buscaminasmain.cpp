@@ -101,9 +101,15 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     connect(botonJugar, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaSeleccionDificultad); });
     connect(botonRecords, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaRecords); });
     connect(panelPrincipal, &QStackedWidget::currentChanged, this, [this](int) {
-        if (panelPrincipal->currentWidget() == pantallaMenu) {
+        QWidget *actual = panelPrincipal->currentWidget();
+        if (actual == pantallaMenu) {
             actualizarMedallas();
             etiquetaSesion->setText(QString("Sesión activa: %1").arg(nombreUsuarioActual));
+            gestorAudio->iniciarMusicaMenu();
+        } else if (actual == ventanaLogin) {
+            gestorAudio->detenerMusica();
+        } else if (actual == ventanaDerrota || actual == ventanaVictoria) {
+            gestorAudio->detenerMusica();
         }
     });
     connect(ventanaVictoria, &VentanaVictoria::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
@@ -217,5 +223,6 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
 
     panelPrincipal->addWidget(ventanaJuego);
     panelPrincipal->setCurrentWidget(ventanaJuego);
+    gestorAudio->iniciarMusicaJuego();
 }
 BuscaminasMain::~BuscaminasMain() {}

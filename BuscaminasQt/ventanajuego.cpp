@@ -165,7 +165,9 @@ void VentanaJuego::manejarClicIzquierdo(int fila, int columna)
         return;
     }
 
-    if (gestorAudio) {
+    // el clic solo suena si la celda está cerrada y sin bandera (la acción tendrá efecto)
+    Celda &celda = tablero->obtenerCelda(fila, columna);
+    if (gestorAudio && !celda.estaRevelada() && !celda.tieneBandera()) {
         gestorAudio->reproducirClic();
     }
 
@@ -185,7 +187,9 @@ void VentanaJuego::manejarClicDerecho(int fila, int columna)
         return;
     }
 
-    if (gestorAudio) {
+    // el sonido de bandera solo suena si se va a colocar una (celda cerrada y sin bandera)
+    Celda &celda = tablero->obtenerCelda(fila, columna);
+    if (gestorAudio && !celda.estaRevelada() && !celda.tieneBandera()) {
         gestorAudio->reproducirBandera();
     }
 

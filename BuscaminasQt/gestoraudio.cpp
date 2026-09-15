@@ -1,17 +1,23 @@
 #include "gestoraudio.h"
 #include <QSoundEffect>
+#include <QMediaPlayer>
+#include <QAudioOutput>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QUrl>
 
 namespace {
-QString rutaSonido(const QString &nombre)
+const char *ARCHIVO_MUSICA_MENU = "sounovamusic-puzzle-amp-casual-game-music-460543.mp3.wav";
+const char *ARCHIVO_MUSICA_JUEGO = "cyberwave-orchestra-adventure-game-fun-background-music-247661.mp3.wav";
+
+QString rutaEnCarpeta(const QString &carpeta, const QString &nombre)
 {
-    // busca el .wav en varias ubicaciones posibles y usa la primera que exista.
+    // busca el archivo en varias ubicaciones posibles y usa la primera que exista.
+    // así funciona aunque el ejecutable se corra desde otra carpeta.
     QStringList candidatas;
-    candidatas << QCoreApplication::applicationDirPath() + "/sonidos/" + nombre
-               << QDir::currentPath() + "/sonidos/" + nombre
+    candidatas << QCoreApplication::applicationDirPath() + "/" + carpeta + "/" + nombre
+               << QDir::currentPath() + "/" + carpeta + "/" + nombre
                << QCoreApplication::applicationDirPath() + "/" + nombre;
     for (const QString &candidata : candidatas) {
         if (QFile::exists(candidata)) {
@@ -23,36 +29,76 @@ QString rutaSonido(const QString &nombre)
 }
 
 GestorAudio::GestorAudio(QObject *parent)
-    : QObject(parent)
+    : QObject(parent), contadorClics(0), contadorBanderas(0), contadorExplosiones(0)
 {
     efectoClic = new QSoundEffect(this);
-    efectoClic->setSource(QUrl::fromLocalFile(rutaSonido("clic.wav")));
+    efectoClic->setSource(QUrl::fromLocalFile(rutaEnCarpeta("sonidos", "clic.wav")));
     efectoClic->setVolume(0.6f);
 
     efectoBandera = new QSoundEffect(this);
-    efectoBandera->setSource(QUrl::fromLocalFile(rutaSonido("bandera.wav")));
+    efectoBandera->setSource(QUrl::fromLocalFile(rutaEnCarpeta("sonidos", "bandera.wav")));
     efectoBandera->setVolume(0.6f);
 
     efectoExplosion = new QSoundEffect(this);
-    efectoExplosion->setSource(QUrl::fromLocalFile(rutaSonido("explosion.wav")));
+    efectoExplosion->setSource(QUrl::fromLocalFile(rutaEnCarpeta("sonidos", "explosion.wav")));
     efectoExplosion->setVolume(0.8f);
+
+    salidaAudio = new QAudioOutput(this);
+    salidaAudio->setVolume(0.5f);
+
+    reproductorMusica = new QMediaPlayer(this);
+    reproductorMusica->setAudioOutput(salidaAudio);
+    reproductorMusica->setLoops(QMediaPlayer::Infinite);
 }
 
 GestorAudio::~GestorAudio() {}
 
 void GestorAudio::reproducirClic()
 {
-    // play() es seguro aunque el sonido aún esté cargando (se reproduce al
-    // terminar de cargar) y no hace nada si el archivo no existe.
+    contadorClics++;
+    // play() es seguro aunque el sonido aún esté cargando
     efectoClic->play();
 }
 
 void GestorAudio::reproducirBandera()
 {
+    contadorBanderas++;
     efectoBandera->play();
 }
 
 void GestorAudio::reproducirExplosion()
 {
+    contadorExplosiones++;
     efectoExplosion->play();
 }
+
+void GestorAudio::iniciarMusicaMenu()
+{
+    reproducirMusica(ARCHIVO_MUSICA_MENU);
+}
+
+void GestorAudio::iniciarMusicaJuego()
+{
+    reproducirMusica(ARCHIVO_MUSICA_JUEGO);
+}
+
+void GestorAudio::detenerMusica()
+{
+    reproductorMusica->stop();
+    musicaActual.clear();
+}
+
+void GestorAudio::reproducirMusica(const QString &archivo)
+{
+    QString ruta = rutaEnCarpeta("musica", archivo);
+    if (musicaActual == ruta && reproductorMusica->playbackState() == QMediaPlayer::PlayingState) {
+        return; // la pista ya está sonando, no la reinicio
+    }
+    musicaActual = ruta;
+    reproductorMusica->setSource(QUrl::fromLocalFile(ruta));
+    reproductorMusica->play();
+}
+
+int GestorAudio::getContadorClics() const { return contadorClics; }
+int GestorAudio::getContadorBanderas() const { return contadorBanderas; }
+int GestorAudio::getContadorExplosiones() const { return contadorExplosiones; }

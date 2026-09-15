@@ -99,6 +99,9 @@ void Tablero::alternarBandera(int fila,int columna){
         return;
     }
     Celda &celda=matriz[fila][columna];
+    if(celda.estaRevelada()){
+        return; // no se puede marcar una celda ya abierta
+    }
     bool teniaAntes=celda.tieneBandera();
     celda.alternarBandera();
     bool tieneAhora=celda.tieneBandera();
