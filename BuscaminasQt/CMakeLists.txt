@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.19)
 project(BuscaminasQt LANGUAGES CXX)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Multimedia)
 
 qt_standard_project_setup()
 
@@ -29,6 +29,8 @@ qt_add_executable(BuscaminasQt
     gestormedallas.h gestormedallas.cpp
     indicadoricono.h indicadoricono.cpp
     ventanavictoria.h ventanavictoria.cpp
+    ventanaderrota.h ventanaderrota.cpp
+    gestoraudio.h gestoraudio.cpp
 
 
 )
@@ -37,6 +39,17 @@ target_link_libraries(BuscaminasQt
     PRIVATE
         Qt::Core
         Qt::Widgets
+        Qt::Multimedia
+)
+
+# copia los sonidos junto al ejecutable para que GestorAudio los encuentre
+add_custom_command(TARGET BuscaminasQt POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/sonidos"
+        "$<TARGET_FILE_DIR:BuscaminasQt>/sonidos"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/musica"
+        "$<TARGET_FILE_DIR:BuscaminasQt>/musica"
 )
 
 install(TARGETS BuscaminasQt

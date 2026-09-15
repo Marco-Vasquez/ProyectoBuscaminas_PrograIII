@@ -8,6 +8,7 @@ class QGraphicsScene;
 class QLabel;
 class VistaJuego;
 class celdagrafica;
+class GestorAudio;
 // Ventana de juego (página dentro del QStackedWidget del main)
 class VentanaJuego : public QWidget
 {
@@ -17,9 +18,13 @@ public:
     ~VentanaJuego() override;
 
     void setNombreJugador(const QString &nombre);
+    void setGestorAudio(GestorAudio *audio);
+    int getSegundosTranscurridos() const;
+    int getBanderasColocadas() const;
 signals:
     void volverSolicitado();
     void victoriaObtenida(int segundos,int banderasColocadas,QString textoMedalla,bool haySiguienteNivel,int filasSiguiente,int columnasSiguiente,int minasSiguiente);
+    void derrotaObtenida(int filas,int columnas,int minas);
 private slots:
     void manejarClicIzquierdo(int fila, int columna);
     void manejarClicDerecho(int fila, int columna);
@@ -40,6 +45,7 @@ private:
     QString nombreJugador;
     int tamanioCelda;
     bool partidaTerminada;
+    GestorAudio *gestorAudio = nullptr;
 
     void construirCeldasGraficas();
     void dibujarTablero();

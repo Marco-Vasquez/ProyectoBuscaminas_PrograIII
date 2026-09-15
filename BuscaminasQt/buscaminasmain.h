@@ -9,6 +9,8 @@ class VentanaRecords;
 class VentanaLogin;
 class QLabel;
 class VentanaVictoria;
+class VentanaDerrota;
+class GestorAudio;
 class BuscaminasMain : public QMainWindow
 {
     Q_OBJECT
@@ -29,6 +31,8 @@ private:
     QLabel *etiquetaMedallaDiamante=nullptr;
     QLabel *etiquetaSesion=nullptr;
     VentanaVictoria *ventanaVictoria=nullptr;
+    VentanaDerrota *ventanaDerrota=nullptr;
+    GestorAudio *gestorAudio=nullptr;
     void abrirPartida(int filas,int columnas,int minas);
     void actualizarMedallas();
     QString nombreUsuarioActual="Jugador";

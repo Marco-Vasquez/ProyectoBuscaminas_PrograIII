@@ -5,7 +5,9 @@
 #include "ventanarecords.h"
 #include "ventanalogin.h"
 #include "ventanavictoria.h"
+#include "ventanaderrota.h"
 #include "gestormedallas.h"
+#include "gestoraudio.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -82,6 +84,8 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     ventanaRegistroUsuario = new RegistroUsuario(panelPrincipal);
     ventanaRecords = new VentanaRecords(panelPrincipal);
     ventanaVictoria = new VentanaVictoria(panelPrincipal);
+    ventanaDerrota = new VentanaDerrota(panelPrincipal);
+    gestorAudio = new GestorAudio(this);
 
     panelPrincipal->addWidget(ventanaLogin);
     panelPrincipal->addWidget(pantallaMenu);
@@ -89,6 +93,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     panelPrincipal->addWidget(ventanaRegistroUsuario);
     panelPrincipal->addWidget(ventanaRecords);
     panelPrincipal->addWidget(ventanaVictoria);
+    panelPrincipal->addWidget(ventanaDerrota);
 
     //login es punto de entrada antes de llegar al menú.
     panelPrincipal->setCurrentWidget(ventanaLogin);
@@ -107,6 +112,14 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         int filas = ventanaVictoria->property("filasSig").toInt();
         int columnas = ventanaVictoria->property("columnasSig").toInt();
         int minas = ventanaVictoria->property("minasSig").toInt();
+        abrirPartida(filas, columnas, minas);
+    });
+    connect(ventanaDerrota, &VentanaDerrota::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
+    connect(ventanaDerrota, &VentanaDerrota::reintentarSolicitado, this, [this]() {
+        // los valores quedan guardados en las propiedades dinámicas de ventanaDerrota (ver abajo)
+        int filas = ventanaDerrota->property("filasReintento").toInt();
+        int columnas = ventanaDerrota->property("columnasReintento").toInt();
+        int minas = ventanaDerrota->property("minasReintento").toInt();
         abrirPartida(filas, columnas, minas);
     });
     connect(botonCerrarSesion, &QPushButton::clicked, this, [this]() {
@@ -179,6 +192,7 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
     }
     ventanaJuego = new VentanaJuego(filas, columnas, minas, panelPrincipal);
     ventanaJuego->setNombreJugador(nombreUsuarioActual);
+    ventanaJuego->setGestorAudio(gestorAudio);
 
     connect(ventanaJuego, &VentanaJuego::volverSolicitado, this, [this]() {
         panelPrincipal->setCurrentWidget(pantallaMenu);
@@ -190,6 +204,15 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
                 ventanaVictoria->setProperty("minasSig", minasSig);
                 ventanaVictoria->mostrarResultado(segundos, banderas, textoMedalla, haySiguiente);
                 panelPrincipal->setCurrentWidget(ventanaVictoria);
+            });
+    connect(ventanaJuego, &VentanaJuego::derrotaObtenida, this,
+            [this](int filas, int columnas, int minas) {
+                ventanaDerrota->setProperty("filasReintento", filas);
+                ventanaDerrota->setProperty("columnasReintento", columnas);
+                ventanaDerrota->setProperty("minasReintento", minas);
+                ventanaDerrota->mostrarResultado(ventanaJuego->getSegundosTranscurridos(),
+                                                 ventanaJuego->getBanderasColocadas());
+                panelPrincipal->setCurrentWidget(ventanaDerrota);
             });
 
     panelPrincipal->addWidget(ventanaJuego);

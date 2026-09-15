@@ -6,6 +6,7 @@
 #include "gestorpuntajes.h"
 #include "gestormedallas.h"
 #include "indicadoricono.h"
+#include "gestoraudio.h"
 
 #include <QHBoxLayout>
 #include <QGraphicsScene>
@@ -13,7 +14,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QMessageBox>
 #include <QFont>
 #include <QSizePolicy>
 #include <algorithm>
@@ -104,6 +104,21 @@ void VentanaJuego::setNombreJugador(const QString &nombre)
     etiquetaJugador->setText(QString("Jugador: %1").arg(nombre));
 }
 
+void VentanaJuego::setGestorAudio(GestorAudio *audio)
+{
+    gestorAudio = audio;
+}
+
+int VentanaJuego::getSegundosTranscurridos() const
+{
+    return cronometro.getSegundosTranscurridos();
+}
+
+int VentanaJuego::getBanderasColocadas() const
+{
+    return tablero->getBanderasColocadas();
+}
+
 void VentanaJuego::construirCeldasGraficas()
 {
     int filas = tablero->getFilas();
@@ -150,6 +165,10 @@ void VentanaJuego::manejarClicIzquierdo(int fila, int columna)
         return;
     }
 
+    if (gestorAudio) {
+        gestorAudio->reproducirClic();
+    }
+
     tablero->abrirCelda(fila, columna);
     dibujarTablero();
 
@@ -164,6 +183,10 @@ void VentanaJuego::manejarClicDerecho(int fila, int columna)
 {
     if (partidaTerminada || !tablero->estaDentroDelTablero(fila, columna)) {
         return;
+    }
+
+    if (gestorAudio) {
+        gestorAudio->reproducirBandera();
     }
 
     tablero->alternarBandera(fila, columna);
@@ -205,7 +228,10 @@ void VentanaJuego::finalizarPartida(bool gano)
 
         emit victoriaObtenida(segundos, banderas, textoMedalla, haySiguiente, filasSig, columnasSig, minasSig);
     } else {
-        QMessageBox::information(this, "Derrota", "Abriste una mina. Intenta de nuevo.");
+        if (gestorAudio) {
+            gestorAudio->reproducirExplosion();
+        }
+        emit derrotaObtenida(tablero->getFilas(), tablero->getColumnas(), tablero->getCantidadMinas());
     }
 }
 QString VentanaJuego::determinarMedalla() const{
