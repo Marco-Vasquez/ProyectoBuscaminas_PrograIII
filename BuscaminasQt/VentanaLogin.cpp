@@ -6,6 +6,8 @@
 #include <QFont>
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
+#include <QDir>
 
 VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
 {
@@ -110,7 +112,7 @@ void VentanaLogin::limpiarCampos()
 bool VentanaLogin::validarCredenciales(const QString &usuario, const QString &contrasena) const
 {
     // Mismo archivo y mismo formato
-    QFile archivo("usuarios.txt");
+    QFile archivo(QDir(QCoreApplication::applicationDirPath()).filePath("usuarios.txt"));
     if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return false;
     }

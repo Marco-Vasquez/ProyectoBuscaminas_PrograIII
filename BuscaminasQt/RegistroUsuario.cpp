@@ -6,6 +6,8 @@
 #include <QFont>
 #include <QFile>
 #include <QTextStream>
+#include <QCoreApplication>
+#include <QDir>
 RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
@@ -47,7 +49,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
             etiquetaError->show();
             return;
         }
-        QFile archivo("usuarios.txt");
+        QFile archivo(QDir(QCoreApplication::applicationDirPath()).filePath("usuarios.txt"));
         if (archivo.open(QIODevice::Append | QIODevice::Text)) {
             QTextStream flujo(&archivo);
             flujo << nombreUsuario << " " << contrasena << "\n";

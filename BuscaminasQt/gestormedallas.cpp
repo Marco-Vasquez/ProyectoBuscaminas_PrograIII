@@ -1,9 +1,15 @@
 #include "gestormedallas.h"
 #include <fstream>
+#include <QCoreApplication>
+#include <QDir>
 using namespace std;
-GestorMedallas::GestorMedallas(const string &rutaArchivo)
-    :rutaArchivo(rutaArchivo),registros(nullptr),cantidadRegistros(0)
-{}
+GestorMedallas::GestorMedallas(const std::string &rutaArchivo)
+{
+    QString ruta = QDir(QCoreApplication::applicationDirPath()).filePath(QString::fromStdString(rutaArchivo));
+    this->rutaArchivo = ruta.toStdString();
+    registros = nullptr;
+    cantidadRegistros = 0;
+}
 GestorMedallas::~GestorMedallas(){
     liberarRegistros();
 }

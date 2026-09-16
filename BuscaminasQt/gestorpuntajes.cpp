@@ -1,6 +1,13 @@
 #include "gestorpuntajes.h"
 #include <fstream>
-GestorPuntajes::GestorPuntajes(const string &rutaArchivo):registros(nullptr),cantidadRegistros(0) {
+#include <QCoreApplication>
+#include <QDir>
+GestorPuntajes::GestorPuntajes(const std::string &rutaArchivo)
+{
+    QString ruta = QDir(QCoreApplication::applicationDirPath()).filePath(QString::fromStdString(rutaArchivo));
+    this->rutaArchivo = ruta.toStdString();
+    registros = nullptr;
+    cantidadRegistros = 0;
 }
 GestorPuntajes::~GestorPuntajes(){
     liberarRegistros();
