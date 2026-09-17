@@ -44,6 +44,7 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
         campo->setMinimumHeight(40);
     }
     botonIngresar->setMinimumHeight(50);
+    botonSalir->setMinimumHeight(50);
 
     botonIngresar->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
     botonIrARegistro->setStyleSheet("background-color: transparent; color: #3498db; border: none;");

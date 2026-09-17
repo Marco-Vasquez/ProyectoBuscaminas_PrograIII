@@ -6,6 +6,7 @@ struct RegistroPuntaje{
     string nombreJugador;
     int segundos;
     string dificultad;
+    string medalla;
 };
 
 class GestorPuntajes
@@ -13,7 +14,7 @@ class GestorPuntajes
 public:
     explicit GestorPuntajes(const string &rutaArchivo="puntajes.txt");
     ~GestorPuntajes();
-    void guardarPuntaje(const string &nombreJugador,int segundos,const string &dificultad);
+    void guardarPuntaje(const string &nombreJugador,int segundos,const string &dificultad,const string &medalla);
     void cargarPuntajes();
     int getCantidadRegistros() const;
     const RegistroPuntaje &obtenerRegistro(int indice) const;

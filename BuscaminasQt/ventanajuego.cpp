@@ -212,11 +212,11 @@ void VentanaJuego::finalizarPartida(bool gano)
         int segundos = cronometro.getSegundosTranscurridos();
         int banderas = tablero->getBanderasColocadas();
         QString dificultadTexto = QString("%1x%2").arg(tablero->getFilas()).arg(tablero->getColumnas());
+        QString medalla = determinarMedalla();
 
         GestorPuntajes gestorPuntajes;
-        gestorPuntajes.guardarPuntaje(nombreJugador.toStdString(), segundos, dificultadTexto.toStdString());
+        gestorPuntajes.guardarPuntaje(nombreJugador.toStdString(), segundos, dificultadTexto.toStdString(), medalla.toStdString());
 
-        QString medalla = determinarMedalla();
         GestorMedallas gestorMedallas;
         bool medallaOtorgada = gestorMedallas.otorgarMedalla(nombreJugador.toStdString(), medalla.toStdString());
         QString textoMedalla = medallaOtorgada

@@ -17,10 +17,10 @@ void GestorPuntajes::liberarRegistros(){
     registros=nullptr;
     cantidadRegistros=0;
 }
-void GestorPuntajes::guardarPuntaje(const string &nombreJugador,int segundos,const string &dificultad){
+void GestorPuntajes::guardarPuntaje(const string &nombreJugador,int segundos,const string &dificultad,const string &medalla){
     ofstream archivo(rutaArchivo,ios::app);
     if(archivo.is_open()){
-        archivo<<nombreJugador<<" "<<segundos<<" "<<dificultad<<"\n";
+        archivo<<nombreJugador<<" "<<segundos<<" "<<dificultad<<" "<<medalla<<"\n";
         archivo.close();
     }
 }
@@ -30,9 +30,15 @@ void GestorPuntajes::cargarPuntajes(){
     if(!archivo.is_open()){
         return;
     }
-    string nombreTemp,dificultadTemp;
+    string nombreTemp,dificultadTemp,medallaTemp;
     int segundosTemp,cantidadLeida=0;
+    // se leen 4 valores por línea; si una línea vieja solo tiene 3,
+    // la medalla queda vacía y se sigue leyendo (compatibilidad hacia atrás)
     while(archivo>>nombreTemp>>segundosTemp>>dificultadTemp){
+        if(!(archivo>>medallaTemp)){
+            medallaTemp="";
+            archivo.clear();
+        }
         cantidadLeida++;
     }
     if(cantidadLeida==0){
@@ -43,9 +49,14 @@ void GestorPuntajes::cargarPuntajes(){
     archivo.seekg(0);
     int i=0;
     while(archivo>>nombreTemp>>segundosTemp>>dificultadTemp && i<cantidadLeida){
+        if(!(archivo>>medallaTemp)){
+            medallaTemp="";
+            archivo.clear();
+        }
         registros[i].nombreJugador=nombreTemp;
         registros[i].segundos=segundosTemp;
         registros[i].dificultad=dificultadTemp;
+        registros[i].medalla=medallaTemp;
         i++;
     }
     cantidadRegistros=cantidadLeida;

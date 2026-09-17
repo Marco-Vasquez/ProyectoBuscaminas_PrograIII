@@ -83,3 +83,9 @@ CMakeLists.txt.user*
 /build*/
 /.qtcreator/
 !**/EjecutableFinal/**
+# Carpeta de distribucion (exe + DLLs desplegadas)
+/dist/
+# Datos de usuario generados en tiempo de ejecucion
+/usuarios.txt
+/puntajes.txt
+/medallas.txt
