@@ -5,8 +5,8 @@
 class QSoundEffect;
 class QMediaPlayer;
 class QAudioOutput;
-// Centraliza los efectos de sonido (QSoundEffect) y la música de fondo (QMediaPlayer).
-// Los efectos van en sonidos/ y la música en musica/ junto al ejecutable.
+// centraliza los efectos de sonido (QSoundEffect) y la música de fondo (QMediaPlayer).
+//los efectos van en sonidos/ y la música en musica/ junto al ejecutable.
 class GestorAudio : public QObject
 {
     Q_OBJECT
