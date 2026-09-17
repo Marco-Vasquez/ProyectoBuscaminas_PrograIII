@@ -6,6 +6,7 @@
 #include "ventanalogin.h"
 #include "ventanavictoria.h"
 #include "ventanaderrota.h"
+#include "ventanaopciones.h"
 #include "gestormedallas.h"
 #include "gestoraudio.h"
 #include <QLabel>
@@ -57,9 +58,10 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     layoutMedallas->addWidget(etiquetaMedallaDiamante);
     QPushButton *botonJugar = new QPushButton("JUGAR", pantallaMenu);
     QPushButton *botonRecords = new QPushButton("RÉCORDS", pantallaMenu);
+    QPushButton *botonOpciones = new QPushButton("OPCIONES", pantallaMenu);
     QPushButton *botonCerrarSesion = new QPushButton("CERRAR SESIÓN", pantallaMenu);
     QPushButton *botonSalir = new QPushButton("SALIR", pantallaMenu);
-    for (QPushButton *boton : {botonJugar, botonRecords, botonCerrarSesion, botonSalir}) {
+    for (QPushButton *boton : {botonJugar, botonRecords, botonOpciones, botonCerrarSesion, botonSalir}) {
         boton->setMinimumHeight(55);
         QFont fuenteBoton = boton->font();
         fuenteBoton.setPointSize(12);
@@ -68,6 +70,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     }
     botonJugar->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
     botonRecords->setStyleSheet("background-color: #9b59b6; color: white; border-radius: 6px;");
+    botonOpciones->setStyleSheet("background-color: #16a085; color: white; border-radius: 6px;");
     botonCerrarSesion->setStyleSheet("background-color: #f39c12; color: white; border-radius: 6px;");
     botonSalir->setStyleSheet("background-color: #e74c3c; color: white; border-radius: 6px;");
     layoutPrincipal->addWidget(etiquetaTitulo);
@@ -75,6 +78,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonJugar);
     layoutPrincipal->addWidget(botonRecords);
+    layoutPrincipal->addWidget(botonOpciones);
     layoutPrincipal->addWidget(botonCerrarSesion);
     layoutPrincipal->addWidget(botonSalir);
     layoutPrincipal->addStretch();
@@ -86,6 +90,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     ventanaVictoria = new VentanaVictoria(panelPrincipal);
     ventanaDerrota = new VentanaDerrota(panelPrincipal);
     gestorAudio = new GestorAudio(this);
+    ventanaOpciones = new VentanaOpciones(gestorAudio, panelPrincipal);
 
     panelPrincipal->addWidget(ventanaLogin);
     panelPrincipal->addWidget(pantallaMenu);
@@ -94,12 +99,22 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     panelPrincipal->addWidget(ventanaRecords);
     panelPrincipal->addWidget(ventanaVictoria);
     panelPrincipal->addWidget(ventanaDerrota);
+    panelPrincipal->addWidget(ventanaOpciones);
 
     //login es punto de entrada antes de llegar al menú.
     panelPrincipal->setCurrentWidget(ventanaLogin);
 
-    connect(botonJugar, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaSeleccionDificultad); });
+    connect(botonJugar, &QPushButton::clicked, this, [this]() {
+        GestorMedallas gestorMedallas;
+        std::string usuario = nombreUsuarioActual.toStdString();
+        bool medioDesbloqueado = gestorMedallas.tieneMedalla(usuario, "Bronce");
+        bool dificilDesbloqueado = gestorMedallas.tieneMedalla(usuario, "Plata");
+        ventanaSeleccionDificultad->actualizarNivelesDesbloqueados(medioDesbloqueado, dificilDesbloqueado);
+        panelPrincipal->setCurrentWidget(ventanaSeleccionDificultad);
+    });
     connect(botonRecords, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaRecords); });
+    connect(botonOpciones, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaOpciones); });
+    connect(ventanaOpciones, &VentanaOpciones::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
     connect(panelPrincipal, &QStackedWidget::currentChanged, this, [this](int) {
         QWidget *actual = panelPrincipal->currentWidget();
         if (actual == pantallaMenu) {
@@ -172,13 +187,13 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 }
 void BuscaminasMain::actualizarMedallas(){
     GestorMedallas gestorMedallas;
-    string usuario=nombreUsuarioActual.toStdString();
+    std::string usuario=nombreUsuarioActual.toStdString();
     struct { QLabel *etiqueta; const char *tipo; const char *color; } medallas[] = {
-            {etiquetaMedallaBronce, "Bronce", "#cd7f32"},
-            {etiquetaMedallaPlata, "Plata", "#a8a9ad"},
-            {etiquetaMedallaOro, "Oro", "#f1c40f"},
-            {etiquetaMedallaDiamante, "Diamante", "#3498db"},
-    };
+                     {etiquetaMedallaBronce, "Bronce", "#cd7f32"},
+                     {etiquetaMedallaPlata, "Plata", "#a8a9ad"},
+                     {etiquetaMedallaOro, "Oro", "#f1c40f"},
+                     {etiquetaMedallaDiamante, "Diamante", "#3498db"},
+                     };
     for(auto &m:medallas){
         bool obtenida=gestorMedallas.tieneMedalla(usuario,m.tipo);
         if (obtenida){

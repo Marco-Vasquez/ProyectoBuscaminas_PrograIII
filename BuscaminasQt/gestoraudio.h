@@ -20,6 +20,10 @@ public:
     void iniciarMusicaMenu();
     void iniciarMusicaJuego();
     void detenerMusica();
+    void setVolumenMusica(int porcentaje);
+    void setVolumenEfectos(int porcentaje);
+    int getVolumenMusica() const;
+    int getVolumenEfectos() const;
 
     // contadores para verificar en pruebas que los efectos solo suenan cuando corresponde
     int getContadorClics() const;
@@ -36,6 +40,7 @@ private:
     int contadorBanderas;
     int contadorExplosiones;
     void reproducirMusica(const QString &archivo);
+    int volumenEfectosActual;
 };
 
 #endif // GESTORAUDIO_H

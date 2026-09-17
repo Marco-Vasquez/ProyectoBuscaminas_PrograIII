@@ -29,7 +29,7 @@ QString rutaEnCarpeta(const QString &carpeta, const QString &nombre)
 }
 
 GestorAudio::GestorAudio(QObject *parent)
-    : QObject(parent), contadorClics(0), contadorBanderas(0), contadorExplosiones(0)
+    : QObject(parent), contadorClics(0), contadorBanderas(0), contadorExplosiones(0),volumenEfectosActual(60)
 {
     efectoClic = new QSoundEffect(this);
     efectoClic->setSource(QUrl::fromLocalFile(rutaEnCarpeta("sonidos", "clic.wav")));
@@ -98,7 +98,22 @@ void GestorAudio::reproducirMusica(const QString &archivo)
     reproductorMusica->setSource(QUrl::fromLocalFile(ruta));
     reproductorMusica->play();
 }
-
+void GestorAudio::setVolumenMusica(int porcentaje){
+    salidaAudio->setVolume(porcentaje/100.0f);
+}
+void GestorAudio::setVolumenEfectos(int porcentaje){
+    volumenEfectosActual=porcentaje;
+    float volumen=porcentaje/100.0f;
+    efectoClic->setVolume(volumen);
+    efectoBandera->setVolume(volumen);
+    efectoExplosion->setVolume(volumen);
+}
+int GestorAudio::getVolumenMusica() const{
+    return static_cast<int>(salidaAudio->volume()*100);
+}
+int GestorAudio::getVolumenEfectos() const{
+    return volumenEfectosActual;
+}
 int GestorAudio::getContadorClics() const { return contadorClics; }
 int GestorAudio::getContadorBanderas() const { return contadorBanderas; }
 int GestorAudio::getContadorExplosiones() const { return contadorExplosiones; }
