@@ -31,6 +31,7 @@ qt_add_executable(BuscaminasQt
     ventanavictoria.h ventanavictoria.cpp
     ventanaderrota.h ventanaderrota.cpp
     gestoraudio.h gestoraudio.cpp
+    ventanaopciones.h ventanaopciones.cpp
 
 
 )

@@ -35,8 +35,8 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
 
     QPushButton *botonFacil = new QPushButton("FÁCIL\n8x8 · 10 minas", paginaMenu);
-    QPushButton *botonMedio = new QPushButton("MEDIO\n16x16 · 40 minas", paginaMenu);
-    QPushButton *botonDificil = new QPushButton("DIFÍCIL\n16x30 · 99 minas", paginaMenu);
+    botonMedio=new QPushButton("MEDIO\n16x16 · 40 minas", paginaMenu);
+    botonDificil=new QPushButton("DIFÍCIL\n16x30 · 99 minas", paginaMenu);
     QPushButton *botonPersonalizado = new QPushButton("PERSONALIZADO", paginaMenu);
     QPushButton *botonVolver = new QPushButton("← VOLVER", paginaMenu);
     for (QPushButton *boton : {botonFacil, botonMedio, botonDificil, botonPersonalizado, botonVolver}) {
@@ -156,5 +156,15 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
 
     panelDificultad->addWidget(paginaMenu);
     panelDificultad->addWidget(paginaPersonalizado);
+}
+void SeleccionarDificultad::actualizarNivelesDesbloqueados(bool medioDesbloqueado,bool dificilDesbloqueado){
+    botonMedio->setEnabled(medioDesbloqueado);
+    botonDificil->setEnabled(dificilDesbloqueado);
+    botonMedio->setStyleSheet(medioDesbloqueado
+                                ?"background-color: #3498db; color: white; border-radius: 6px;"
+                                :"background-color: #bdc3c7; color: #7f8c8d; border-radius: 6px;");
+    botonDificil->setStyleSheet(dificilDesbloqueado
+                                ?"background-color: #e74c3c; color: white; border-radius: 6px;"
+                                :"background-color: #bdc3c7; color: #7f8c8d; border-radius: 6px;");
 }
 SeleccionarDificultad::~SeleccionarDificultad() {}
