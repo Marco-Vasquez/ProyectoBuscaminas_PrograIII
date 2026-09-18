@@ -167,6 +167,11 @@ void VentanaJuego::manejarClicIzquierdo(int fila, int columna)
     if (partidaTerminada || !tablero->estaDentroDelTablero(fila, columna)){
         return;
     }
+    // el clic solo suena si la celda está cerrada y sin bandera (la acción tendrá efecto)
+    Celda &celda = tablero->obtenerCelda(fila, columna);
+    if (gestorAudio && !celda.estaRevelada() && !celda.tieneBandera()) {
+        gestorAudio->reproducirClic();
+    }
     int celdasSinAbrirAntes = (tablero->getFilas() * tablero->getColumnas()) - tablero->getCeldasReveladas();
     int minasRestantesAntes = tablero->getCantidadMinas() - tablero->getBanderasColocadas();
     double probabilidadMinaAntes = celdasSinAbrirAntes > 0

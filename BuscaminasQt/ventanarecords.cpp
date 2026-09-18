@@ -8,6 +8,8 @@
 #include <QFont>
 #include <QString>
 #include <QEvent>
+#include <vector>
+#include <algorithm>
 
 // mismo esquema de colores de medallas que el menú principal
 static QString colorDeMedalla(const std::string &medalla)
@@ -16,7 +18,8 @@ static QString colorDeMedalla(const std::string &medalla)
     if (medalla == "Plata")    return "#a8a9ad";
     if (medalla == "Oro")      return "#f1c40f";
     if (medalla == "Diamante") return "#3498db";
-    return "#95a5a6"; // registro sin medalla (archivo viejo)
+    if (medalla == "Valiente") return "#e67e22";
+    return "#95a5a6"; // "Ninguna", registro sin medalla o archivo viejo
 }
 
 VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
@@ -73,8 +76,19 @@ void VentanaRecords::actualizarRecords(){
         layoutRegistros->addWidget(etiquetaVacio);
         return;
     }
+
+    // copia local para ordenar por puntaje (mayor primero) sin tocar el gestor
+    std::vector<RegistroPuntaje> registros;
+    registros.reserve(cantidad);
     for(int i=0;i<cantidad;i++){
-        const RegistroPuntaje &registro=gestorPuntajes.obtenerRegistro(i);
+        registros.push_back(gestorPuntajes.obtenerRegistro(i));
+    }
+    std::sort(registros.begin(), registros.end(),
+              [](const RegistroPuntaje &a, const RegistroPuntaje &b){
+                  return a.puntaje > b.puntaje;
+              });
+
+    for(const RegistroPuntaje &registro : registros){
 
         // tarjeta por partida: contenedor con fondo y bordes redondeados
         QFrame *tarjeta=new QFrame(this);
@@ -112,13 +126,22 @@ void VentanaRecords::actualizarRecords(){
 
         layoutTarjeta->addStretch();
 
+        // puntaje (grande) y tiempo (chico) a la derecha
+        QVBoxLayout *layoutPuntajeTiempo=new QVBoxLayout();
+        layoutPuntajeTiempo->setSpacing(2);
+        QLabel *etiquetaPuntaje=new QLabel(QString("%1 pts").arg(registro.puntaje), tarjeta);
+        QFont fuentePuntaje=etiquetaPuntaje->font();
+        fuentePuntaje.setPointSize(14);
+        fuentePuntaje.setBold(true);
+        etiquetaPuntaje->setFont(fuentePuntaje);
+        etiquetaPuntaje->setStyleSheet("color: white; background: transparent;");
+        etiquetaPuntaje->setAlignment(Qt::AlignRight);
         QLabel *etiquetaTiempo=new QLabel(QString("%1s").arg(registro.segundos), tarjeta);
-        QFont fuenteTiempo=etiquetaTiempo->font();
-        fuenteTiempo.setPointSize(14);
-        fuenteTiempo.setBold(true);
-        etiquetaTiempo->setFont(fuenteTiempo);
-        etiquetaTiempo->setStyleSheet("color: white; background: transparent;");
-        layoutTarjeta->addWidget(etiquetaTiempo);
+        etiquetaTiempo->setStyleSheet("color: #bdc3c7; background: transparent;");
+        etiquetaTiempo->setAlignment(Qt::AlignRight);
+        layoutPuntajeTiempo->addWidget(etiquetaPuntaje);
+        layoutPuntajeTiempo->addWidget(etiquetaTiempo);
+        layoutTarjeta->addLayout(layoutPuntajeTiempo);
 
         layoutRegistros->addWidget(tarjeta);
     }

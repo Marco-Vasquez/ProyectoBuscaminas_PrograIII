@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QStackedWidget>
+#include <QShowEvent>
 #include <QFont>
 #include <QComboBox>
 
@@ -17,7 +18,7 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
     layoutPrincipal->setContentsMargins(0, 0, 0, 0);
 
-    QStackedWidget *panelDificultad = new QStackedWidget(this);
+    panelDificultad = new QStackedWidget(this);
     layoutPrincipal->addWidget(panelDificultad);
 
     // --- Página 1: menú de dificultades ---
@@ -53,7 +54,7 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     connect(botonFacil, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(8, 8, 10); });
     connect(botonMedio, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(16, 16, 40); });
     connect(botonDificil, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(16, 30, 99); });
-    connect(botonPersonalizado, &QPushButton::clicked, panelDificultad, [panelDificultad]() { panelDificultad->setCurrentIndex(1); });
+    connect(botonPersonalizado, &QPushButton::clicked, panelDificultad, [this]() { panelDificultad->setCurrentIndex(1); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
 
     layoutMenu->addWidget(etiquetaTitulo);
@@ -128,7 +129,7 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
         emit dificultadSeleccionada(filas, columnas, minas);
     });
 
-    connect(botonVolverPersonalizado, &QPushButton::clicked, panelDificultad, [panelDificultad]() { panelDificultad->setCurrentIndex(0); });
+    connect(botonVolverPersonalizado, &QPushButton::clicked, panelDificultad, [this]() { panelDificultad->setCurrentIndex(0); });
 
     layoutPersonalizado->addWidget(etiquetaPersonalizado);
     layoutPersonalizado->addSpacing(10);
@@ -139,6 +140,12 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
 
     panelDificultad->addWidget(paginaMenu);
     panelDificultad->addWidget(paginaPersonalizado);
+}
+void SeleccionarDificultad::showEvent(QShowEvent *evento){
+    QWidget::showEvent(evento);
+    // al volver a mostrar la pantalla siempre se arranca en el menú de niveles,
+    // no en la configuración personalizada que quedó abierta la última vez
+    panelDificultad->setCurrentIndex(0);
 }
 void SeleccionarDificultad::actualizarNivelesDesbloqueados(bool medioDesbloqueado,bool dificilDesbloqueado){
     botonMedio->setEnabled(medioDesbloqueado);
