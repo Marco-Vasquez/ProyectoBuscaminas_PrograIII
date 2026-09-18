@@ -16,6 +16,7 @@ public:
     bool juegoPerdido() const;
     bool juegoGanado() const;
     int getBanderasColocadas() const;
+    int getCeldasReveladas() const;
 private:
     Celda** matriz;
     int filas,columnas,cantMinas;

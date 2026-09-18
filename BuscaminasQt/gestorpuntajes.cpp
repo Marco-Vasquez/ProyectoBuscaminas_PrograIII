@@ -1,7 +1,9 @@
 #include "gestorpuntajes.h"
 #include <fstream>
+#include <sstream>
 #include <QCoreApplication>
 #include <QDir>
+
 GestorPuntajes::GestorPuntajes(const std::string &rutaArchivo)
 {
     QString ruta = QDir(QCoreApplication::applicationDirPath()).filePath(QString::fromStdString(rutaArchivo));
@@ -17,10 +19,10 @@ void GestorPuntajes::liberarRegistros(){
     registros=nullptr;
     cantidadRegistros=0;
 }
-void GestorPuntajes::guardarPuntaje(const string &nombreJugador,int segundos,const string &dificultad,const string &medalla){
+void GestorPuntajes::guardarPuntaje(const string &nombreJugador,int segundos,const string &dificultad,const string &medalla,int puntaje){
     ofstream archivo(rutaArchivo,ios::app);
     if(archivo.is_open()){
-        archivo<<nombreJugador<<" "<<segundos<<" "<<dificultad<<" "<<medalla<<"\n";
+        archivo<<nombreJugador<<" "<<segundos<<" "<<dificultad<<" "<<medalla<<" "<<puntaje<<"\n";
         archivo.close();
     }
 }
@@ -30,36 +32,40 @@ void GestorPuntajes::cargarPuntajes(){
     if(!archivo.is_open()){
         return;
     }
-    string nombreTemp,dificultadTemp,medallaTemp;
-    int segundosTemp,cantidadLeida=0;
-    // se leen 4 valores por línea; si una línea vieja solo tiene 3,
-    // la medalla queda vacía y se sigue leyendo (compatibilidad hacia atrás)
-    while(archivo>>nombreTemp>>segundosTemp>>dificultadTemp){
-        if(!(archivo>>medallaTemp)){
-            medallaTemp="";
-            archivo.clear();
+
+    string linea;
+    int cantidadValida = 0;
+    while (getline(archivo, linea)) {
+        istringstream flujo(linea);
+        string nombreTemp, dificultadTemp, medallaTemp;
+        int segundosTemp, puntajeTemp;
+        if (flujo >> nombreTemp >> segundosTemp >> dificultadTemp >> medallaTemp >> puntajeTemp) {
+            cantidadValida++;
         }
-        cantidadLeida++;
     }
-    if(cantidadLeida==0){
+    if (cantidadValida == 0) {
         return;
     }
-    registros=new RegistroPuntaje[cantidadLeida];
+
+    registros = new RegistroPuntaje[cantidadValida];
     archivo.clear();
     archivo.seekg(0);
-    int i=0;
-    while(archivo>>nombreTemp>>segundosTemp>>dificultadTemp && i<cantidadLeida){
-        if(!(archivo>>medallaTemp)){
-            medallaTemp="";
-            archivo.clear();
+
+    int i = 0;
+    while (getline(archivo, linea) && i < cantidadValida) {
+        istringstream flujo(linea);
+        string nombreTemp, dificultadTemp, medallaTemp;
+        int segundosTemp, puntajeTemp;
+        if (flujo >> nombreTemp >> segundosTemp >> dificultadTemp >> medallaTemp >> puntajeTemp) {
+            registros[i].nombreJugador = nombreTemp;
+            registros[i].segundos = segundosTemp;
+            registros[i].dificultad = dificultadTemp;
+            registros[i].medalla = medallaTemp;
+            registros[i].puntaje = puntajeTemp;
+            i++;
         }
-        registros[i].nombreJugador=nombreTemp;
-        registros[i].segundos=segundosTemp;
-        registros[i].dificultad=dificultadTemp;
-        registros[i].medalla=medallaTemp;
-        i++;
     }
-    cantidadRegistros=cantidadLeida;
+    cantidadRegistros = i;
 }
 int GestorPuntajes::getCantidadRegistros() const{
     return cantidadRegistros;

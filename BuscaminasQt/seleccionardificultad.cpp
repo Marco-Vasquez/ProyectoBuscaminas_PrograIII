@@ -1,12 +1,11 @@
 #include "seleccionardificultad.h"
 #include <QLabel>
 #include <QPushButton>
-#include <QLineEdit>
-#include <QIntValidator>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QStackedWidget>
 #include <QFont>
+#include <QComboBox>
 
 namespace {
 const int FILAS_COLUMNAS_MINIMO = 5;
@@ -79,19 +78,33 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     etiquetaPersonalizado->setFont(fuentePersonalizado);
     etiquetaPersonalizado->setAlignment(Qt::AlignCenter);
 
-    QLineEdit *campoFilas = new QLineEdit(paginaPersonalizado);
-    campoFilas->setPlaceholderText(QString("Filas (%1-%2)").arg(FILAS_COLUMNAS_MINIMO).arg(FILAS_COLUMNAS_MAXIMO));
-    campoFilas->setValidator(new QIntValidator(1, 999, campoFilas));
+    QComboBox *campoFilas = new QComboBox(paginaPersonalizado);
+    for (int i = FILAS_COLUMNAS_MINIMO; i <= FILAS_COLUMNAS_MAXIMO; i++) {
+        campoFilas->addItem(QString("Filas: %1").arg(i), i);
+    }
 
-    QLineEdit *campoColumnas = new QLineEdit(paginaPersonalizado);
-    campoColumnas->setPlaceholderText(QString("Columnas (%1-%2)").arg(FILAS_COLUMNAS_MINIMO).arg(FILAS_COLUMNAS_MAXIMO));
-    campoColumnas->setValidator(new QIntValidator(1, 999, campoColumnas));
+    QComboBox *campoColumnas = new QComboBox(paginaPersonalizado);
+    for (int i = FILAS_COLUMNAS_MINIMO; i <= FILAS_COLUMNAS_MAXIMO; i++) {
+        campoColumnas->addItem(QString("Columnas: %1").arg(i), i);
+    }
 
-    QLineEdit *campoMinas = new QLineEdit(paginaPersonalizado);
-    campoMinas->setPlaceholderText("Minas");
-    campoMinas->setValidator(new QIntValidator(1, 999 * 999, campoMinas));
+    QComboBox *campoMinas = new QComboBox(paginaPersonalizado);
 
-    for (QLineEdit *campo : {campoFilas, campoColumnas, campoMinas}) {
+    auto actualizarOpcionesMinas = [campoFilas, campoColumnas, campoMinas]() {
+        int filasElegidas = campoFilas->currentData().toInt();
+        int columnasElegidas = campoColumnas->currentData().toInt();
+        int maximoMinas = filasElegidas * columnasElegidas - 1;
+        campoMinas->clear();
+        for (int i = 1; i <= maximoMinas; i++) {
+            campoMinas->addItem(QString("Minas: %1").arg(i), i);
+        }
+    };
+    actualizarOpcionesMinas();
+
+    connect(campoFilas, QOverload<int>::of(&QComboBox::currentIndexChanged), paginaPersonalizado, actualizarOpcionesMinas);
+    connect(campoColumnas, QOverload<int>::of(&QComboBox::currentIndexChanged), paginaPersonalizado, actualizarOpcionesMinas);
+
+    for (QComboBox *campo : {campoFilas, campoColumnas, campoMinas}) {
         campo->setMinimumHeight(40);
     }
 
@@ -99,12 +112,6 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     layoutCamposPersonalizado->addWidget(campoFilas);
     layoutCamposPersonalizado->addWidget(campoColumnas);
     layoutCamposPersonalizado->addWidget(campoMinas);
-
-    QLabel *etiquetaError = new QLabel(paginaPersonalizado);
-    etiquetaError->setStyleSheet("color: #e74c3c;");
-    etiquetaError->setWordWrap(true);
-    etiquetaError->setAlignment(Qt::AlignCenter);
-    etiquetaError->hide();
 
     QPushButton *botonJugarPersonalizado = new QPushButton("JUGAR PERSONALIZADO", paginaPersonalizado);
     botonJugarPersonalizado->setMinimumHeight(50);
@@ -114,33 +121,10 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     botonVolverPersonalizado->setMinimumHeight(50);
     botonVolverPersonalizado->setStyleSheet("background-color: #95a5a6; color: white; border-radius: 6px;");
 
-    connect(botonJugarPersonalizado, &QPushButton::clicked, this, [this, campoFilas, campoColumnas, campoMinas, etiquetaError]() {
-        bool filasOk = false, columnasOk = false, minasOk = false;
-        int filas = campoFilas->text().toInt(&filasOk);
-        int columnas = campoColumnas->text().toInt(&columnasOk);
-        int minas = campoMinas->text().toInt(&minasOk);
-
-        if (!filasOk || !columnasOk || !minasOk) {
-            etiquetaError->setText("Completá filas, columnas y minas con números válidos.");
-            etiquetaError->show();
-            return;
-        }
-        if (filas < FILAS_COLUMNAS_MINIMO || filas > FILAS_COLUMNAS_MAXIMO
-            || columnas < FILAS_COLUMNAS_MINIMO || columnas > FILAS_COLUMNAS_MAXIMO) {
-            etiquetaError->setText(QString("Filas y columnas deben estar entre %1 y %2.")
-                                       .arg(FILAS_COLUMNAS_MINIMO).arg(FILAS_COLUMNAS_MAXIMO));
-            etiquetaError->show();
-            return;
-        }
-        int maximoMinas = filas * columnas - 1;
-        if (minas < 1 || minas > maximoMinas) {
-            etiquetaError->setText(QString("Con %1 filas x %2 columnas, la cantidad de minas debe estar entre 1 y %3.")
-                                       .arg(filas).arg(columnas).arg(maximoMinas));
-            etiquetaError->show();
-            return;
-        }
-
-        etiquetaError->hide();
+    connect(botonJugarPersonalizado, &QPushButton::clicked, this, [this, campoFilas, campoColumnas, campoMinas]() {
+        int filas = campoFilas->currentData().toInt();
+        int columnas = campoColumnas->currentData().toInt();
+        int minas = campoMinas->currentData().toInt();
         emit dificultadSeleccionada(filas, columnas, minas);
     });
 
@@ -149,7 +133,6 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     layoutPersonalizado->addWidget(etiquetaPersonalizado);
     layoutPersonalizado->addSpacing(10);
     layoutPersonalizado->addLayout(layoutCamposPersonalizado);
-    layoutPersonalizado->addWidget(etiquetaError);
     layoutPersonalizado->addWidget(botonJugarPersonalizado);
     layoutPersonalizado->addStretch();
     layoutPersonalizado->addWidget(botonVolverPersonalizado);

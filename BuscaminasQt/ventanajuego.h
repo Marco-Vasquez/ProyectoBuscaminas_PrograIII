@@ -51,5 +51,7 @@ private:
     void dibujarTablero();
     void finalizarPartida(bool gano);
     QString determinarMedalla() const;
+
+    bool jugadaArriesgadaDetectada=false;
 };
 #endif // VENTANAJUEGO_H

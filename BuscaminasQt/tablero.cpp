@@ -141,3 +141,14 @@ bool Tablero::juegoGanado() const{
     }
     return true;
 }
+int Tablero::getCeldasReveladas() const{
+    int contador=0;
+    for(int fila=0;fila<filas;fila++){
+        for(int columna=0;columna<columnas;columna++){
+            if(matriz[fila][columna].estaRevelada()){
+                contador++;
+            }
+        }
+    }
+    return contador;
+}

@@ -9,11 +9,11 @@
 #include "gestoraudio.h"
 
 #include <QHBoxLayout>
-#include <QGraphicsScene>
-#include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGraphicsScene>
 #include <QLabel>
 #include <QPushButton>
+#include <QFrame>
 #include <QFont>
 #include <QSizePolicy>
 #include <algorithm>
@@ -24,7 +24,7 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     tablero = new Tablero(filas, columnas, cantidadMinas);
 
     //tamaño de cada celda se calcula para que el tablero completo
-    // siempre entre en la misma área
+    //siempre entre en la misma área
     int celdaPorAncho = ANCHO_AREA_TABLERO / columnas;
     int celdaPorAlto = ALTO_AREA_TABLERO / filas;
     tamanioCelda = std::min(celdaPorAncho, celdaPorAlto);
@@ -36,21 +36,25 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     layoutPrincipal->setContentsMargins(15, 15, 15, 15);
     layoutPrincipal->setSpacing(10);
 
-    QHBoxLayout *layoutEncabezado = new QHBoxLayout();
+    QFrame *panelEncabezado = new QFrame(this);
+    panelEncabezado->setStyleSheet("background-color: #ecf0f1; border-radius: 8px;");
+    QHBoxLayout *layoutEncabezado = new QHBoxLayout(panelEncabezado);
+    layoutEncabezado->setContentsMargins(12, 8, 12, 8);
 
-    etiquetaJugador=new QLabel(QString("Jugador: %1").arg(nombreJugador),this);
-    etiquetaEstado = new QLabel(this);
-    etiquetaBanderas=new QLabel(this);
-    etiquetaTiempo = new QLabel("Tiempo: 0s", this);
+    etiquetaJugador=new QLabel(QString("Jugador: %1").arg(nombreJugador),panelEncabezado);
+    etiquetaEstado = new QLabel(panelEncabezado);
+    etiquetaBanderas=new QLabel(panelEncabezado);
+    etiquetaTiempo = new QLabel("Tiempo: 0s", panelEncabezado);
     for (QLabel *etiqueta : {etiquetaJugador, etiquetaEstado, etiquetaBanderas, etiquetaTiempo}) {
         QFont fuenteEstado = etiqueta->font();
         fuenteEstado.setPointSize(10);
         fuenteEstado.setBold(true);
         etiqueta->setFont(fuenteEstado);
+        etiqueta->setStyleSheet("color: #2c3e50;");
     }
 
-    IndicadorIcono *iconoMina=new IndicadorIcono(TipoIcono::Mina,this);
-    IndicadorIcono *iconoBandera=new IndicadorIcono(TipoIcono::Bandera,this);
+    IndicadorIcono *iconoMina=new IndicadorIcono(TipoIcono::Mina,panelEncabezado);
+    IndicadorIcono *iconoBandera=new IndicadorIcono(TipoIcono::Bandera,panelEncabezado);
 
     layoutEncabezado->addWidget(etiquetaJugador);
     layoutEncabezado->addStretch();
@@ -66,7 +70,6 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     vista = new VistaJuego(this);
     vista->setScene(escena);
     vista->setTamanioCelda(tamanioCelda);
-    // con la ventana, y VistaJuego::resizeEvent() la reescala manteniendo
     vista->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     vista->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vista->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -78,7 +81,7 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
         emit volverSolicitado();
     });
 
-    layoutPrincipal->addLayout(layoutEncabezado);
+    layoutPrincipal->addWidget(panelEncabezado);
     layoutPrincipal->addWidget(vista, 1);
     layoutPrincipal->addWidget(botonVolver);
 
@@ -161,22 +164,24 @@ void VentanaJuego::dibujarTablero()
 
 void VentanaJuego::manejarClicIzquierdo(int fila, int columna)
 {
-    if (partidaTerminada || !tablero->estaDentroDelTablero(fila, columna)) {
+    if (partidaTerminada || !tablero->estaDentroDelTablero(fila, columna)){
         return;
     }
-
-    // el clic solo suena si la celda está cerrada y sin bandera (la acción tendrá efecto)
-    Celda &celda = tablero->obtenerCelda(fila, columna);
-    if (gestorAudio && !celda.estaRevelada() && !celda.tieneBandera()) {
-        gestorAudio->reproducirClic();
-    }
-
+    int celdasSinAbrirAntes = (tablero->getFilas() * tablero->getColumnas()) - tablero->getCeldasReveladas();
+    int minasRestantesAntes = tablero->getCantidadMinas() - tablero->getBanderasColocadas();
+    double probabilidadMinaAntes = celdasSinAbrirAntes > 0
+                                       ? static_cast<double>(minasRestantesAntes) / celdasSinAbrirAntes
+                                       : 0.0;
     tablero->abrirCelda(fila, columna);
     dibujarTablero();
-
     if (tablero->juegoPerdido()) {
         finalizarPartida(false);
-    } else if (tablero->juegoGanado()) {
+        return;
+    }
+    if (!jugadaArriesgadaDetectada && probabilidadMinaAntes >= 0.40 && probabilidadMinaAntes <= 0.60) {
+        jugadaArriesgadaDetectada = true;
+    }
+    if (tablero->juegoGanado()) {
         finalizarPartida(true);
     }
 }
@@ -211,19 +216,33 @@ void VentanaJuego::finalizarPartida(bool gano)
     if (gano) {
         int segundos = cronometro.getSegundosTranscurridos();
         int banderas = tablero->getBanderasColocadas();
+        int minas = tablero->getCantidadMinas();
         QString dificultadTexto = QString("%1x%2").arg(tablero->getFilas()).arg(tablero->getColumnas());
         QString medalla = determinarMedalla();
 
-        GestorPuntajes gestorPuntajes;
-        gestorPuntajes.guardarPuntaje(nombreJugador.toStdString(), segundos, dificultadTexto.toStdString(), medalla.toStdString());
-
         GestorMedallas gestorMedallas;
         bool medallaOtorgada = gestorMedallas.otorgarMedalla(nombreJugador.toStdString(), medalla.toStdString());
+
+        QString medallaParaGuardar = medallaOtorgada ? medalla : "Ninguna";
+
         QString textoMedalla = medallaOtorgada
                                    ? QString("Medalla obtenida: %1").arg(medalla)
                                    : QString("Todavía no desbloqueaste la medalla %1 (completá el nivel anterior primero)").arg(medalla);
 
-        int filas = tablero->getFilas(), columnas = tablero->getColumnas(), minas = tablero->getCantidadMinas();
+        //Medalla por la jugada 50/50 si es detectada
+        if (jugadaArriesgadaDetectada) {
+            gestorMedallas.otorgarMedalla(nombreJugador.toStdString(), "Valiente");
+        }
+
+        //El puntaje se maneja: mayor dificultad (mas minas) mas puntos base, mientras mas rapido menos penalización
+        int puntaje = (minas * 100) - (segundos * 2);
+        if (puntaje < 10) puntaje = 10;
+
+        GestorPuntajes gestorPuntajes;
+        gestorPuntajes.guardarPuntaje(nombreJugador.toStdString(), segundos, dificultadTexto.toStdString(),
+                                      medallaParaGuardar.toStdString(), puntaje);
+
+        int filas = tablero->getFilas(), columnas = tablero->getColumnas();
         bool haySiguiente = true;
         int filasSig = 0, columnasSig = 0, minasSig = 0;
         if (filas == 8 && columnas == 8 && minas == 10) { filasSig = 16; columnasSig = 16; minasSig = 40; }
