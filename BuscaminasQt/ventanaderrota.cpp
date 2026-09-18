@@ -1,15 +1,18 @@
 #include "ventanaderrota.h"
+#include "estilos.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QFont>
 VentanaDerrota::VentanaDerrota(QWidget *parent):QWidget(parent) {
+    setStyleSheet(Estilos::fondoPantalla());
+
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
-    layoutPrincipal->setContentsMargins(50, 40, 50, 40);
+    layoutPrincipal->setContentsMargins(60, 40, 60, 40);
     layoutPrincipal->setSpacing(14);
     QLabel *etiquetaTitulo = new QLabel("PERDISTE", this);
     QFont fuenteTitulo = etiquetaTitulo->font();
-    fuenteTitulo.setPointSize(28);
+    fuenteTitulo.setPointSize(30);
     fuenteTitulo.setBold(true);
     etiquetaTitulo->setFont(fuenteTitulo);
     etiquetaTitulo->setStyleSheet("color: #e74c3c;");
@@ -21,14 +24,14 @@ VentanaDerrota::VentanaDerrota(QWidget *parent):QWidget(parent) {
         QFont fuente = etiqueta->font();
         fuente.setPointSize(13);
         etiqueta->setFont(fuente);
+        etiqueta->setStyleSheet(Estilos::texto(13));
     }
     QPushButton *botonReintentar = new QPushButton("REINTENTAR", this);
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENÚ", this);
-    for (QPushButton *boton : {botonReintentar, botonVolver}) {
-        boton->setMinimumHeight(50);
-    }
-    botonReintentar->setStyleSheet("background-color: #e74c3c; color: white; border-radius: 6px;");
-    botonVolver->setStyleSheet("background-color: #7f8c8d; color: white; border-radius: 6px;");
+    botonReintentar->setMinimumHeight(50);
+    botonReintentar->setStyleSheet(Estilos::boton(Estilos::ROJO));
+    botonVolver->setMinimumHeight(50);
+    botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonReintentar, &QPushButton::clicked, this, [this]() { emit reintentarSolicitado(); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
     layoutPrincipal->addStretch();

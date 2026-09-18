@@ -1,8 +1,10 @@
 #include "ventanalogin.h"
+#include "estilos.h"
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QFrame>
 #include <QFont>
 #include <QFile>
 #include <QTextStream>
@@ -11,44 +13,62 @@
 
 VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
 {
+    setStyleSheet(Estilos::fondoPantalla());
+
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
-    layoutPrincipal->setContentsMargins(40, 30, 40, 30);
+    layoutPrincipal->setContentsMargins(60, 40, 60, 40);
     layoutPrincipal->setSpacing(12);
 
-    QLabel *etiquetaTitulo = new QLabel("INICIAR SESIÓN", this);
-    QFont fuenteTitulo = etiquetaTitulo->font();
-    fuenteTitulo.setPointSize(18);
-    fuenteTitulo.setBold(true);
-    etiquetaTitulo->setFont(fuenteTitulo);
-    etiquetaTitulo->setAlignment(Qt::AlignCenter);
+    // saludo grande al entrar
+    QLabel *etiquetaSaludo = new QLabel("¡Bienvenido!", this);
+    etiquetaSaludo->setStyleSheet(Estilos::titulo(30));
+    etiquetaSaludo->setAlignment(Qt::AlignCenter);
 
-    campoUsuario = new QLineEdit(this);
+    QLabel *etiquetaSubtitulo = new QLabel("Iniciá sesión para jugar", this);
+    etiquetaSubtitulo->setStyleSheet(Estilos::textoSuave(13));
+    etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
+
+    // tarjeta con el formulario
+    QFrame *tarjeta = new QFrame(this);
+    tarjeta->setStyleSheet(Estilos::tarjeta());
+    QVBoxLayout *layoutTarjeta = new QVBoxLayout(tarjeta);
+    layoutTarjeta->setContentsMargins(24, 24, 24, 24);
+    layoutTarjeta->setSpacing(12);
+
+    campoUsuario = new QLineEdit(tarjeta);
     campoUsuario->setPlaceholderText("Nombre de usuario");
-    campoContrasena = new QLineEdit(this);
+    campoContrasena = new QLineEdit(tarjeta);
     campoContrasena->setPlaceholderText("Contraseña");
     campoContrasena->setEchoMode(QLineEdit::Password);
+    for (QLineEdit *campo : {campoUsuario, campoContrasena}) {
+        campo->setMinimumHeight(44);
+        campo->setStyleSheet(Estilos::campoTexto());
+    }
 
-    etiquetaError = new QLabel(this);
-    etiquetaError->setStyleSheet("color: #e74c3c;");
+    etiquetaError = new QLabel(tarjeta);
+    etiquetaError->setStyleSheet("color: #e74c3c; font-size: 12px;");
     etiquetaError->setWordWrap(true);
     etiquetaError->setAlignment(Qt::AlignCenter);
     etiquetaError->hide();
 
-    QPushButton *botonMostrarContrasena = new QPushButton("Mostrar contraseña", this);
+    QPushButton *botonMostrarContrasena = new QPushButton("Mostrar contraseña", tarjeta);
     botonMostrarContrasena->setCheckable(true);
-    QPushButton *botonIngresar = new QPushButton("INGRESAR", this);
-    QPushButton *botonIrARegistro = new QPushButton("¿No tenés cuenta? Regístrate", this);
-    QPushButton *botonSalir=new QPushButton("SALIR",this);
+    botonMostrarContrasena->setStyleSheet(
+        "QPushButton { background: transparent; color: #3498db; border: none; font-size: 12px; }"
+        "QPushButton:hover { color: #5dade2; }");
 
-    for (QLineEdit *campo : {campoUsuario, campoContrasena}) {
-        campo->setMinimumHeight(40);
-    }
+    QPushButton *botonIngresar = new QPushButton("INGRESAR", tarjeta);
     botonIngresar->setMinimumHeight(50);
-    botonSalir->setMinimumHeight(50);
+    botonIngresar->setStyleSheet(Estilos::boton(Estilos::VERDE));
 
-    botonIngresar->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
-    botonIrARegistro->setStyleSheet("background-color: transparent; color: #3498db; border: none;");
-    botonSalir->setStyleSheet("background-color: #e74c3c; color: white; border-radius: 6px");
+    QPushButton *botonIrARegistro = new QPushButton("¿No tenés cuenta? Regístrate", tarjeta);
+    botonIrARegistro->setStyleSheet(
+        "QPushButton { background: transparent; color: #3498db; border: none; font-size: 12px; }"
+        "QPushButton:hover { color: #5dade2; }");
+
+    QPushButton *botonSalir = new QPushButton("SALIR", this);
+    botonSalir->setMinimumHeight(50);
+    botonSalir->setStyleSheet(Estilos::boton(Estilos::ROJO));
 
     connect(botonMostrarContrasena, &QPushButton::toggled, this, [this, botonMostrarContrasena](bool marcado) {
         campoContrasena->setEchoMode(marcado ? QLineEdit::Normal : QLineEdit::Password);
@@ -79,19 +99,21 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     connect(botonIrARegistro, &QPushButton::clicked, this, [this]() { emit registroSolicitado(); });
     connect(botonSalir, &QPushButton::clicked, this, [this]() { emit salirSolicitado(); });
 
+    layoutTarjeta->addWidget(campoUsuario);
+    layoutTarjeta->addWidget(campoContrasena);
+    layoutTarjeta->addWidget(botonMostrarContrasena);
+    layoutTarjeta->addWidget(etiquetaError);
+    layoutTarjeta->addWidget(botonIngresar);
+    layoutTarjeta->addWidget(botonIrARegistro);
+
     layoutPrincipal->addStretch();
-    layoutPrincipal->addWidget(etiquetaTitulo);
-    layoutPrincipal->addSpacing(10);
-    layoutPrincipal->addWidget(campoUsuario);
-    layoutPrincipal->addWidget(campoContrasena);
-    layoutPrincipal->addWidget(botonMostrarContrasena);
-    layoutPrincipal->addSpacing(10);
-    layoutPrincipal->addWidget(etiquetaError);
-    layoutPrincipal->addWidget(botonIngresar);
-    layoutPrincipal->addWidget(botonIrARegistro);
-    layoutPrincipal->addSpacing(10);
+    layoutPrincipal->addWidget(etiquetaSaludo);
+    layoutPrincipal->addWidget(etiquetaSubtitulo);
+    layoutPrincipal->addSpacing(16);
+    layoutPrincipal->addWidget(tarjeta);
+    layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonSalir);
-    layoutPrincipal->addStretch();
+    layoutPrincipal->addSpacing(8);
 }
 
 VentanaLogin::~VentanaLogin() {}

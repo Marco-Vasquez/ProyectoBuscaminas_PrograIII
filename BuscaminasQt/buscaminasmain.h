@@ -30,6 +30,10 @@ private:
     QLabel *etiquetaMedallaPlata=nullptr;
     QLabel *etiquetaMedallaOro=nullptr;
     QLabel *etiquetaMedallaDiamante=nullptr;
+    QLabel *etiquetaIconoBronce=nullptr;
+    QLabel *etiquetaIconoPlata=nullptr;
+    QLabel *etiquetaIconoOro=nullptr;
+    QLabel *etiquetaIconoDiamante=nullptr;
     QLabel *etiquetaSesion=nullptr;
     VentanaVictoria *ventanaVictoria=nullptr;
     VentanaDerrota *ventanaDerrota=nullptr;

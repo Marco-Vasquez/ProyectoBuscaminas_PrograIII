@@ -9,9 +9,13 @@
 #include "ventanaopciones.h"
 #include "gestormedallas.h"
 #include "gestoraudio.h"
+#include "estilos.h"
+#include "medallaimagen.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QFrame>
 #include <QWidget>
 #include <QStackedWidget>
 #include <QFont>
@@ -26,53 +30,64 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 
     // Menú principal
     pantallaMenu = new QWidget(panelPrincipal);
+    pantallaMenu->setStyleSheet(Estilos::fondoPantalla());
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(pantallaMenu);
-    layoutPrincipal->setContentsMargins(40, 40, 40, 40);
-    layoutPrincipal->setSpacing(15);
+    layoutPrincipal->setContentsMargins(50, 30, 50, 30);
+    layoutPrincipal->setSpacing(12);
     QLabel *etiquetaTitulo = new QLabel("BUSCAMINAS", pantallaMenu);
-    QFont fuenteTitulo = etiquetaTitulo->font();
-    fuenteTitulo.setPointSize(24);
-    fuenteTitulo.setBold(true);
-    etiquetaTitulo->setFont(fuenteTitulo);
+    etiquetaTitulo->setStyleSheet(Estilos::titulo(30));
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
     etiquetaSesion = new QLabel(pantallaMenu);
     etiquetaSesion->setAlignment(Qt::AlignCenter);
-    etiquetaSesion->setStyleSheet("color: #7f8c8d;");
+    etiquetaSesion->setStyleSheet(Estilos::texto(16));
     layoutPrincipal->addWidget(etiquetaSesion);
-    QHBoxLayout *layoutMedallas=new QHBoxLayout();
-    etiquetaMedallaBronce=new QLabel("BRONCE",pantallaMenu);
-    etiquetaMedallaPlata=new QLabel("PLATA",pantallaMenu);
-    etiquetaMedallaOro=new QLabel("ORO",pantallaMenu);
-    etiquetaMedallaDiamante=new QLabel("DIAMANTE",pantallaMenu);
-    for(QLabel *medalla:{etiquetaMedallaBronce,etiquetaMedallaPlata,etiquetaMedallaOro,etiquetaMedallaDiamante}){
-        medalla->setAlignment(Qt::AlignCenter);
-        medalla->setMinimumHeight(30);
-        QFont fuenteMedalla=medalla->font();
-        fuenteMedalla.setPointSize(9);
-        fuenteMedalla.setBold(true);
-        medalla->setFont(fuenteMedalla);
+
+    // medallas del jugador: tarjetas con el PNG real de cada medalla
+    QHBoxLayout *layoutMedallas = new QHBoxLayout();
+    layoutMedallas->setSpacing(10);
+    etiquetaIconoBronce = new QLabel(pantallaMenu);
+    etiquetaIconoPlata = new QLabel(pantallaMenu);
+    etiquetaIconoOro = new QLabel(pantallaMenu);
+    etiquetaIconoDiamante = new QLabel(pantallaMenu);
+    etiquetaMedallaBronce = new QLabel("BRONCE", pantallaMenu);
+    etiquetaMedallaPlata = new QLabel("PLATA", pantallaMenu);
+    etiquetaMedallaOro = new QLabel("ORO", pantallaMenu);
+    etiquetaMedallaDiamante = new QLabel("DIAMANTE", pantallaMenu);
+    struct { QLabel *icono; QLabel *nombre; } medallas[] = {
+        {etiquetaIconoBronce, etiquetaMedallaBronce},
+        {etiquetaIconoPlata, etiquetaMedallaPlata},
+        {etiquetaIconoOro, etiquetaMedallaOro},
+        {etiquetaIconoDiamante, etiquetaMedallaDiamante},
+    };
+    for (auto &m : medallas) {
+        QFrame *tarjetaMedalla = new QFrame(pantallaMenu);
+        tarjetaMedalla->setStyleSheet(Estilos::tarjeta());
+        QVBoxLayout *layoutMedalla = new QVBoxLayout(tarjetaMedalla);
+        layoutMedalla->setContentsMargins(10, 10, 10, 8);
+        layoutMedalla->setSpacing(4);
+        m.icono->setFixedSize(44, 44);
+        m.icono->setAlignment(Qt::AlignCenter);
+        m.nombre->setAlignment(Qt::AlignCenter);
+        m.nombre->setStyleSheet("color: #5d6d6e; font-weight: bold; font-size: 10px;");
+        layoutMedalla->addWidget(m.icono);
+        layoutMedalla->addWidget(m.nombre);
+        layoutMedallas->addWidget(tarjetaMedalla);
     }
-    layoutMedallas->addWidget(etiquetaMedallaBronce);
-    layoutMedallas->addWidget(etiquetaMedallaPlata);
-    layoutMedallas->addWidget(etiquetaMedallaOro);
-    layoutMedallas->addWidget(etiquetaMedallaDiamante);
     QPushButton *botonJugar = new QPushButton("JUGAR", pantallaMenu);
     QPushButton *botonRecords = new QPushButton("RÉCORDS", pantallaMenu);
     QPushButton *botonOpciones = new QPushButton("OPCIONES", pantallaMenu);
     QPushButton *botonCerrarSesion = new QPushButton("CERRAR SESIÓN", pantallaMenu);
     QPushButton *botonSalir = new QPushButton("SALIR", pantallaMenu);
-    for (QPushButton *boton : {botonJugar, botonRecords, botonOpciones, botonCerrarSesion, botonSalir}) {
-        boton->setMinimumHeight(55);
-        QFont fuenteBoton = boton->font();
-        fuenteBoton.setPointSize(12);
-        fuenteBoton.setBold(true);
-        boton->setFont(fuenteBoton);
-    }
-    botonJugar->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
-    botonRecords->setStyleSheet("background-color: #9b59b6; color: white; border-radius: 6px;");
-    botonOpciones->setStyleSheet("background-color: #16a085; color: white; border-radius: 6px;");
-    botonCerrarSesion->setStyleSheet("background-color: #f39c12; color: white; border-radius: 6px;");
-    botonSalir->setStyleSheet("background-color: #e74c3c; color: white; border-radius: 6px;");
+    botonJugar->setMinimumHeight(60);
+    botonJugar->setStyleSheet(Estilos::boton(Estilos::VERDE));
+    botonRecords->setMinimumHeight(50);
+    botonRecords->setStyleSheet(Estilos::boton(Estilos::MORADO));
+    botonOpciones->setMinimumHeight(50);
+    botonOpciones->setStyleSheet(Estilos::boton(Estilos::TURQUESA));
+    botonCerrarSesion->setMinimumHeight(50);
+    botonCerrarSesion->setStyleSheet(Estilos::boton(Estilos::NARANJA));
+    botonSalir->setMinimumHeight(50);
+    botonSalir->setStyleSheet(Estilos::boton(Estilos::ROJO));
     layoutPrincipal->addWidget(etiquetaTitulo);
     layoutPrincipal->addLayout(layoutMedallas);
     layoutPrincipal->addStretch();
@@ -119,7 +134,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         QWidget *actual = panelPrincipal->currentWidget();
         if (actual == pantallaMenu) {
             actualizarMedallas();
-            etiquetaSesion->setText(QString("Sesión activa: %1").arg(nombreUsuarioActual));
+            etiquetaSesion->setText(QString("¡Hola, %1!").arg(nombreUsuarioActual));
             gestorAudio->iniciarMusicaMenu();
         } else if (actual == ventanaLogin) {
             gestorAudio->detenerMusica();
@@ -188,20 +203,19 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 void BuscaminasMain::actualizarMedallas(){
     GestorMedallas gestorMedallas;
     std::string usuario=nombreUsuarioActual.toStdString();
-    struct { QLabel *etiqueta; const char *tipo; const char *color; } medallas[] = {
-                     {etiquetaMedallaBronce, "Bronce", "#cd7f32"},
-                     {etiquetaMedallaPlata, "Plata", "#a8a9ad"},
-                     {etiquetaMedallaOro, "Oro", "#f1c40f"},
-                     {etiquetaMedallaDiamante, "Diamante", "#3498db"},
+    struct { QLabel *icono; QLabel *nombre; const char *tipo; } medallas[] = {
+                     {etiquetaIconoBronce, etiquetaMedallaBronce, "Bronce"},
+                     {etiquetaIconoPlata, etiquetaMedallaPlata, "Plata"},
+                     {etiquetaIconoOro, etiquetaMedallaOro, "Oro"},
+                     {etiquetaIconoDiamante, etiquetaMedallaDiamante, "Diamante"},
                      };
     for(auto &m:medallas){
         bool obtenida=gestorMedallas.tieneMedalla(usuario,m.tipo);
-        if (obtenida){
-            m.etiqueta->setStyleSheet(QString("background-color: %1; color: white; border-radius: 6px;").arg(m.color));
-        }
-        else{
-            m.etiqueta->setStyleSheet("background-color: #dcdcdc; color: #999999; border-radius: 6px;");
-        }
+        // PNG real de la medalla; gris (ninguna) si todavía no se ganó
+        m.icono->setPixmap(cargarMedallaPixmap(obtenida ? QString(m.tipo) : "Ninguna", 44));
+        m.nombre->setStyleSheet(obtenida
+            ? QString("color: %1; font-weight: bold; font-size: 10px;").arg(colorDeMedalla(m.tipo))
+            : "color: #5d6d6e; font-weight: bold; font-size: 10px;");
     }
 }
 void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)

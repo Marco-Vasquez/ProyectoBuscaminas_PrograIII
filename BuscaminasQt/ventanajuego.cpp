@@ -7,6 +7,7 @@
 #include "gestormedallas.h"
 #include "indicadoricono.h"
 #include "gestoraudio.h"
+#include "estilos.h"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
@@ -16,11 +17,14 @@
 #include <QFrame>
 #include <QFont>
 #include <QSizePolicy>
+#include <QColor>
 #include <algorithm>
 
 VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *parent)
     : QWidget(parent), nombreJugador("Jugador"), partidaTerminada(false)
 {
+    setStyleSheet(Estilos::fondoPantalla());
+
     tablero = new Tablero(filas, columnas, cantidadMinas);
 
     //tamaño de cada celda se calcula para que el tablero completo
@@ -37,9 +41,10 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     layoutPrincipal->setSpacing(10);
 
     QFrame *panelEncabezado = new QFrame(this);
-    panelEncabezado->setStyleSheet("background-color: #ecf0f1; border-radius: 8px;");
+    panelEncabezado->setStyleSheet(Estilos::tarjeta());
     QHBoxLayout *layoutEncabezado = new QHBoxLayout(panelEncabezado);
-    layoutEncabezado->setContentsMargins(12, 8, 12, 8);
+    layoutEncabezado->setContentsMargins(14, 10, 14, 10);
+    layoutEncabezado->setSpacing(8);
 
     etiquetaJugador=new QLabel(QString("Jugador: %1").arg(nombreJugador),panelEncabezado);
     etiquetaEstado = new QLabel(panelEncabezado);
@@ -50,7 +55,7 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
         fuenteEstado.setPointSize(10);
         fuenteEstado.setBold(true);
         etiqueta->setFont(fuenteEstado);
-        etiqueta->setStyleSheet("color: #2c3e50;");
+        etiqueta->setStyleSheet("color: #ecf0f1; background: transparent;");
     }
 
     IndicadorIcono *iconoMina=new IndicadorIcono(TipoIcono::Mina,panelEncabezado);
@@ -73,9 +78,11 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     vista->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     vista->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vista->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    vista->setBackgroundBrush(QColor(Estilos::FONDO));
 
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENU", this);
-    botonVolver->setStyleSheet("background-color: #7f8c8d; color: white; border-radius: 6px; padding: 8px;");
+    botonVolver->setMinimumHeight(45);
+    botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonVolver, &QPushButton::clicked, this, [this]() {
         cronometro.detener();
         emit volverSolicitado();

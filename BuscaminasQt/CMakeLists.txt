@@ -32,6 +32,8 @@ qt_add_executable(BuscaminasQt
     ventanaderrota.h ventanaderrota.cpp
     gestoraudio.h gestoraudio.cpp
     ventanaopciones.h ventanaopciones.cpp
+    estilos.h
+    medallaimagen.h
 
 
 )
@@ -51,6 +53,9 @@ add_custom_command(TARGET BuscaminasQt POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/musica"
         "$<TARGET_FILE_DIR:BuscaminasQt>/musica"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_CURRENT_SOURCE_DIR}/recursos"
+        "$<TARGET_FILE_DIR:BuscaminasQt>/recursos"
 )
 
 install(TARGETS BuscaminasQt

@@ -25,8 +25,13 @@ void celdagrafica::paint(QPainter *painter,const QStyleOptionGraphicsItem *optio
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     if(!revelada){
-        painter->fillRect(rectangulo,bandera ? QColor("#f39c12"):QColor("#bdc3c7"));
-        painter->setPen(Qt::black);
+        // celda cerrada con gradiente (efecto 3D clásico del buscaminas)
+        QColor base = bandera ? QColor("#e67e22") : QColor("#95a5a6");
+        QLinearGradient gradiente(0, 0, size, size);
+        gradiente.setColorAt(0.0, base.lighter(118));
+        gradiente.setColorAt(1.0, base.darker(112));
+        painter->fillRect(rectangulo, gradiente);
+        painter->setPen(QPen(QColor("#7f8c8d"), 1));
         painter->drawRect(rectangulo);
         if(bandera){
             dibujarBandera(painter,rectangulo);
@@ -35,13 +40,13 @@ void celdagrafica::paint(QPainter *painter,const QStyleOptionGraphicsItem *optio
     }
     if(mina){
         painter->fillRect(rectangulo,QColor("#e74c3c"));
-        painter->setPen(Qt::black);
+        painter->setPen(QPen(QColor("#c0392b"), 1));
         painter->drawRect(rectangulo);
         dibujarMina(painter,rectangulo);
         return;
     }
     painter->fillRect(rectangulo,QColor("#ecf0f1"));
-    painter->setPen(Qt::black);
+    painter->setPen(QPen(QColor("#bdc3c7"), 1));
     painter->drawRect(rectangulo);
     if(minasVecinas>0){
         static const QColor colores[9]={

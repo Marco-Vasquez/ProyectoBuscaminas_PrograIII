@@ -1,15 +1,18 @@
 #include "ventanavictoria.h"
+#include "estilos.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QFont>
 VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
+    setStyleSheet(Estilos::fondoPantalla());
+
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
-    layoutPrincipal->setContentsMargins(50, 40, 50, 40);
+    layoutPrincipal->setContentsMargins(60, 40, 60, 40);
     layoutPrincipal->setSpacing(14);
     QLabel *etiquetaTitulo = new QLabel("¡VICTORIA!", this);
     QFont fuenteTitulo = etiquetaTitulo->font();
-    fuenteTitulo.setPointSize(28);
+    fuenteTitulo.setPointSize(30);
     fuenteTitulo.setBold(true);
     etiquetaTitulo->setFont(fuenteTitulo);
     etiquetaTitulo->setStyleSheet("color: #2ecc71;");
@@ -22,15 +25,15 @@ VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
         QFont fuente = etiqueta->font();
         fuente.setPointSize(13);
         etiqueta->setFont(fuente);
+        etiqueta->setStyleSheet(Estilos::texto(13));
     }
-    etiquetaMedalla->setStyleSheet("font-weight: bold;");
+    etiquetaMedalla->setStyleSheet("font-weight: bold; color: #f1c40f; font-size: 14px;");
     botonSiguienteNivel = new QPushButton("SIGUIENTE NIVEL", this);
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENÚ", this);
-    for (QPushButton *boton : {botonSiguienteNivel, botonVolver}) {
-        boton->setMinimumHeight(50);
-    }
-    botonSiguienteNivel->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
-    botonVolver->setStyleSheet("background-color: #7f8c8d; color: white; border-radius: 6px;");
+    botonSiguienteNivel->setMinimumHeight(50);
+    botonSiguienteNivel->setStyleSheet(Estilos::boton(Estilos::VERDE));
+    botonVolver->setMinimumHeight(50);
+    botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonSiguienteNivel, &QPushButton::clicked, this, [this]() { emit siguienteNivelSolicitado(); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
     layoutPrincipal->addStretch();

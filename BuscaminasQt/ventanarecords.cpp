@@ -1,5 +1,7 @@
 #include "ventanarecords.h"
 #include "gestorpuntajes.h"
+#include "estilos.h"
+#include "medallaimagen.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -11,37 +13,31 @@
 #include <vector>
 #include <algorithm>
 
-// mismo esquema de colores de medallas que el menú principal
-static QString colorDeMedalla(const std::string &medalla)
-{
-    if (medalla == "Bronce")   return "#cd7f32";
-    if (medalla == "Plata")    return "#a8a9ad";
-    if (medalla == "Oro")      return "#f1c40f";
-    if (medalla == "Diamante") return "#3498db";
-    if (medalla == "Valiente") return "#e67e22";
-    return "#95a5a6"; // "Ninguna", registro sin medalla o archivo viejo
-}
-
 VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
 {
+    setStyleSheet(Estilos::fondoPantalla());
+
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
-    layoutPrincipal->setContentsMargins(30, 20, 30, 20);
+    layoutPrincipal->setContentsMargins(40, 25, 40, 25);
     layoutPrincipal->setSpacing(8);
 
     QLabel *etiquetaTitulo = new QLabel("MEJORES TIEMPOS", this);
-    QFont fuenteTitulo = etiquetaTitulo->font();
-    fuenteTitulo.setPointSize(16);
-    fuenteTitulo.setBold(true);
-    etiquetaTitulo->setFont(fuenteTitulo);
+    etiquetaTitulo->setStyleSheet(Estilos::titulo(24));
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
     layoutPrincipal->addWidget(etiquetaTitulo);
+
+    QLabel *etiquetaSubtitulo = new QLabel("Ordenados por puntaje", this);
+    etiquetaSubtitulo->setStyleSheet(Estilos::textoSuave(12));
+    etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
+    layoutPrincipal->addWidget(etiquetaSubtitulo);
 
     //es un layout aparte para vaciar/reconstruir esta pantalla sin tocar el titulo ni el botón volver
     layoutRegistros=new QVBoxLayout();
     layoutPrincipal->addLayout(layoutRegistros);
 
     QPushButton *botonVolver=new QPushButton("<- VOLVER",this);
-    botonVolver->setStyleSheet("background-color: #95a5a6;color:white;border-radius:6px");
+    botonVolver->setMinimumHeight(50);
+    botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonVolver,&QPushButton::clicked,this,[this](){
         emit volverSolicitado();
     });
@@ -72,6 +68,7 @@ void VentanaRecords::actualizarRecords(){
     int cantidad=gestorPuntajes.getCantidadRegistros();
     if(cantidad==0){
         QLabel *etiquetaVacio=new QLabel("Todavía no hay puntajes guardados",this);
+        etiquetaVacio->setStyleSheet(Estilos::textoSuave(13));
         etiquetaVacio->setAlignment(Qt::AlignCenter);
         layoutRegistros->addWidget(etiquetaVacio);
         return;
@@ -97,17 +94,28 @@ void VentanaRecords::actualizarRecords(){
         layoutTarjeta->setContentsMargins(12, 8, 12, 8);
         layoutTarjeta->setSpacing(12);
 
-        // insignia de color según la medalla de ese registro
+        // medalla real (PNG) según el registro
         QString nombreMedalla=QString::fromStdString(registro.medalla);
         if(nombreMedalla.isEmpty()){
-            nombreMedalla="SIN MEDALLA";
+            nombreMedalla="Ninguna";
         }
-        QLabel *insignia=new QLabel(nombreMedalla.toUpper(), tarjeta);
-        insignia->setAlignment(Qt::AlignCenter);
-        insignia->setMinimumSize(110, 28);
-        insignia->setStyleSheet(QString("background-color: %1; color: white; border-radius: 14px; font-weight: bold;")
-                                    .arg(colorDeMedalla(registro.medalla)));
-        layoutTarjeta->addWidget(insignia);
+        QLabel *iconoMedalla=new QLabel(tarjeta);
+        iconoMedalla->setFixedSize(36, 36);
+        iconoMedalla->setPixmap(cargarMedallaPixmap(nombreMedalla, 36));
+        layoutTarjeta->addWidget(iconoMedalla);
+
+        QVBoxLayout *layoutMedallaNombre=new QVBoxLayout();
+        layoutMedallaNombre->setSpacing(0);
+        QLabel *etiquetaMedalla=new QLabel(nombreMedalla.toUpper(), tarjeta);
+        QFont fuenteMedalla=etiquetaMedalla->font();
+        fuenteMedalla.setPointSize(9);
+        fuenteMedalla.setBold(true);
+        etiquetaMedalla->setFont(fuenteMedalla);
+        etiquetaMedalla->setStyleSheet(QString("color: %1; background: transparent;")
+                                           .arg(colorDeMedalla(nombreMedalla)));
+        layoutMedallaNombre->addWidget(etiquetaMedalla);
+        layoutMedallaNombre->addStretch();
+        layoutTarjeta->addLayout(layoutMedallaNombre);
 
         // nombre + dificultad a la izquierda, tiempo a la derecha
         QVBoxLayout *layoutDatos=new QVBoxLayout();

@@ -1,4 +1,5 @@
 #include "seleccionardificultad.h"
+#include "estilos.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -15,6 +16,8 @@ const int FILAS_COLUMNAS_MAXIMO = 40;
 
 SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
 {
+    setStyleSheet(Estilos::fondoPantalla());
+
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(this);
     layoutPrincipal->setContentsMargins(0, 0, 0, 0);
 
@@ -24,32 +27,32 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     // --- Página 1: menú de dificultades ---
     QWidget *paginaMenu = new QWidget(panelDificultad);
     QVBoxLayout *layoutMenu = new QVBoxLayout(paginaMenu);
-    layoutMenu->setContentsMargins(40, 30, 40, 30);
+    layoutMenu->setContentsMargins(50, 30, 50, 30);
     layoutMenu->setSpacing(12);
 
     QLabel *etiquetaTitulo = new QLabel("SELECCIONAR DIFICULTAD", paginaMenu);
-    QFont fuenteTitulo = etiquetaTitulo->font();
-    fuenteTitulo.setPointSize(18);
-    fuenteTitulo.setBold(true);
-    etiquetaTitulo->setFont(fuenteTitulo);
+    etiquetaTitulo->setStyleSheet(Estilos::titulo(24));
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
+
+    QLabel *etiquetaSubtitulo = new QLabel("Elegí el nivel de desafío", paginaMenu);
+    etiquetaSubtitulo->setStyleSheet(Estilos::textoSuave(13));
+    etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
 
     QPushButton *botonFacil = new QPushButton("FÁCIL\n8x8 · 10 minas", paginaMenu);
     botonMedio=new QPushButton("MEDIO\n16x16 · 40 minas", paginaMenu);
     botonDificil=new QPushButton("DIFÍCIL\n16x30 · 99 minas", paginaMenu);
     QPushButton *botonPersonalizado = new QPushButton("PERSONALIZADO", paginaMenu);
     QPushButton *botonVolver = new QPushButton("← VOLVER", paginaMenu);
-    for (QPushButton *boton : {botonFacil, botonMedio, botonDificil, botonPersonalizado, botonVolver}) {
-        boton->setMinimumHeight(55);
-        QFont fuenteBoton = boton->font();
-        fuenteBoton.setPointSize(11);
-        boton->setFont(fuenteBoton);
-    }
-    botonFacil->setStyleSheet("background-color: #2ecc71; color: white; border-radius: 6px;");
-    botonMedio->setStyleSheet("background-color: #3498db; color: white; border-radius: 6px;");
-    botonDificil->setStyleSheet("background-color: #e74c3c; color: white; border-radius: 6px;");
-    botonPersonalizado->setStyleSheet("background-color: #9b59b6; color: white; border-radius: 6px;");
-    botonVolver->setStyleSheet("background-color: #95a5a6; color: white; border-radius: 6px;");
+    botonFacil->setMinimumHeight(60);
+    botonFacil->setStyleSheet(Estilos::boton(Estilos::VERDE));
+    botonMedio->setMinimumHeight(60);
+    botonMedio->setStyleSheet(Estilos::boton(Estilos::AZUL));
+    botonDificil->setMinimumHeight(60);
+    botonDificil->setStyleSheet(Estilos::boton(Estilos::ROJO));
+    botonPersonalizado->setMinimumHeight(55);
+    botonPersonalizado->setStyleSheet(Estilos::boton(Estilos::MORADO));
+    botonVolver->setMinimumHeight(50);
+    botonVolver->setStyleSheet(Estilos::botonSecundario());
 
     connect(botonFacil, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(8, 8, 10); });
     connect(botonMedio, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(16, 16, 40); });
@@ -58,6 +61,7 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
 
     layoutMenu->addWidget(etiquetaTitulo);
+    layoutMenu->addWidget(etiquetaSubtitulo);
     layoutMenu->addSpacing(10);
     layoutMenu->addWidget(botonFacil);
     layoutMenu->addWidget(botonMedio);
@@ -69,15 +73,16 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     // --- Página 2: configuración personalizada ---
     QWidget *paginaPersonalizado = new QWidget(panelDificultad);
     QVBoxLayout *layoutPersonalizado = new QVBoxLayout(paginaPersonalizado);
-    layoutPersonalizado->setContentsMargins(40, 30, 40, 30);
+    layoutPersonalizado->setContentsMargins(50, 30, 50, 30);
     layoutPersonalizado->setSpacing(12);
 
     QLabel *etiquetaPersonalizado = new QLabel("PERSONALIZADO", paginaPersonalizado);
-    QFont fuentePersonalizado = etiquetaPersonalizado->font();
-    fuentePersonalizado.setPointSize(18);
-    fuentePersonalizado.setBold(true);
-    etiquetaPersonalizado->setFont(fuentePersonalizado);
+    etiquetaPersonalizado->setStyleSheet(Estilos::titulo(24));
     etiquetaPersonalizado->setAlignment(Qt::AlignCenter);
+
+    QLabel *etiquetaAyuda = new QLabel("Elegí el tamaño del tablero y la cantidad de minas", paginaPersonalizado);
+    etiquetaAyuda->setStyleSheet(Estilos::textoSuave(13));
+    etiquetaAyuda->setAlignment(Qt::AlignCenter);
 
     QComboBox *campoFilas = new QComboBox(paginaPersonalizado);
     for (int i = FILAS_COLUMNAS_MINIMO; i <= FILAS_COLUMNAS_MAXIMO; i++) {
@@ -106,21 +111,23 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     connect(campoColumnas, QOverload<int>::of(&QComboBox::currentIndexChanged), paginaPersonalizado, actualizarOpcionesMinas);
 
     for (QComboBox *campo : {campoFilas, campoColumnas, campoMinas}) {
-        campo->setMinimumHeight(40);
+        campo->setMinimumHeight(44);
+        campo->setStyleSheet(Estilos::combo());
     }
 
     QHBoxLayout *layoutCamposPersonalizado = new QHBoxLayout();
+    layoutCamposPersonalizado->setSpacing(10);
     layoutCamposPersonalizado->addWidget(campoFilas);
     layoutCamposPersonalizado->addWidget(campoColumnas);
     layoutCamposPersonalizado->addWidget(campoMinas);
 
     QPushButton *botonJugarPersonalizado = new QPushButton("JUGAR PERSONALIZADO", paginaPersonalizado);
-    botonJugarPersonalizado->setMinimumHeight(50);
-    botonJugarPersonalizado->setStyleSheet("background-color: #9b59b6; color: white; border-radius: 6px;");
+    botonJugarPersonalizado->setMinimumHeight(55);
+    botonJugarPersonalizado->setStyleSheet(Estilos::boton(Estilos::MORADO));
 
     QPushButton *botonVolverPersonalizado = new QPushButton("← VOLVER", paginaPersonalizado);
     botonVolverPersonalizado->setMinimumHeight(50);
-    botonVolverPersonalizado->setStyleSheet("background-color: #95a5a6; color: white; border-radius: 6px;");
+    botonVolverPersonalizado->setStyleSheet(Estilos::botonSecundario());
 
     connect(botonJugarPersonalizado, &QPushButton::clicked, this, [this, campoFilas, campoColumnas, campoMinas]() {
         int filas = campoFilas->currentData().toInt();
@@ -132,6 +139,7 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     connect(botonVolverPersonalizado, &QPushButton::clicked, panelDificultad, [this]() { panelDificultad->setCurrentIndex(0); });
 
     layoutPersonalizado->addWidget(etiquetaPersonalizado);
+    layoutPersonalizado->addWidget(etiquetaAyuda);
     layoutPersonalizado->addSpacing(10);
     layoutPersonalizado->addLayout(layoutCamposPersonalizado);
     layoutPersonalizado->addWidget(botonJugarPersonalizado);
@@ -150,11 +158,6 @@ void SeleccionarDificultad::showEvent(QShowEvent *evento){
 void SeleccionarDificultad::actualizarNivelesDesbloqueados(bool medioDesbloqueado,bool dificilDesbloqueado){
     botonMedio->setEnabled(medioDesbloqueado);
     botonDificil->setEnabled(dificilDesbloqueado);
-    botonMedio->setStyleSheet(medioDesbloqueado
-                                ?"background-color: #3498db; color: white; border-radius: 6px;"
-                                :"background-color: #bdc3c7; color: #7f8c8d; border-radius: 6px;");
-    botonDificil->setStyleSheet(dificilDesbloqueado
-                                ?"background-color: #e74c3c; color: white; border-radius: 6px;"
-                                :"background-color: #bdc3c7; color: #7f8c8d; border-radius: 6px;");
+    // el estilo :disabled del tema ya los muestra grises y bloqueados
 }
 SeleccionarDificultad::~SeleccionarDificultad() {}

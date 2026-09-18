@@ -3,6 +3,7 @@
 #include <QWidget>
 class GestorAudio;
 class QSlider;
+class QLabel;
 class VentanaOpciones:public QWidget
 {
     Q_OBJECT
@@ -15,6 +16,8 @@ private:
     GestorAudio* gestorAudio;
     QSlider* sliderMusica;
     QSlider* sliderEfectos;
+    QLabel* etiquetaValorMusica;
+    QLabel* etiquetaValorEfectos;
 };
 
 #endif // VENTANAOPCIONES_H

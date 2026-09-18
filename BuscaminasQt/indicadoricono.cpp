@@ -23,10 +23,11 @@ void IndicadorIcono::paintEvent(QPaintEvent *evento){
     }
 }
 void IndicadorIcono::dibujarMina(QPainter *painter,const QRectF &rectangulo){
+    // color claro para que se vea sobre el encabezado oscuro
     QPointF centro=rectangulo.center();
     qreal radio=rectangulo.width()*0.32;
-    painter->setPen(QPen(Qt::black,1.5));
-    painter->setBrush(Qt::black);
+    painter->setPen(QPen(QColor("#ecf0f1"),1.5));
+    painter->setBrush(QColor("#ecf0f1"));
     painter->drawEllipse(centro,radio,radio);
     for(int angulo=0;angulo<360;angulo+=45) {
         qreal radianes=qDegreesToRadians(static_cast<qreal>(angulo));
@@ -39,13 +40,13 @@ void IndicadorIcono::dibujarBandera(QPainter *painter, const QRectF &rectangulo)
     qreal margen=rectangulo.width()*0.22;
     QPointF baseAsta(rectangulo.center().x(),rectangulo.bottom()-margen*0.6);
     QPointF puntaAsta(rectangulo.center().x(),rectangulo.top()+margen*0.5);
-    painter->setPen(QPen(Qt::black,1.5));
+    painter->setPen(QPen(QColor("#ecf0f1"),1.5));
     painter->drawLine(baseAsta,puntaAsta);
     QPolygonF banderaForma;
     banderaForma<<puntaAsta
                 <<QPointF(puntaAsta.x()+rectangulo.width()*0.35,puntaAsta.y()+rectangulo.height()*0.15)
                 <<QPointF(puntaAsta.x(),puntaAsta.y()+rectangulo.height()*0.30);
-    painter->setPen(Qt::black);
-    painter->setBrush(QColor("#c0392b"));
+    painter->setPen(QPen(QColor("#ecf0f1"),1.0));
+    painter->setBrush(QColor("#e74c3c"));
     painter->drawPolygon(banderaForma);
 }
