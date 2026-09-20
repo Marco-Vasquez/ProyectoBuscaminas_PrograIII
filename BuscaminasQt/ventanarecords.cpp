@@ -10,6 +10,8 @@
 #include <QFont>
 #include <QString>
 #include <QEvent>
+#include <QScrollArea>
+#include <QComboBox>
 #include <vector>
 #include <algorithm>
 
@@ -31,9 +33,33 @@ VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
     etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
     layoutPrincipal->addWidget(etiquetaSubtitulo);
 
-    //es un layout aparte para vaciar/reconstruir esta pantalla sin tocar el titulo ni el botón volver
-    layoutRegistros=new QVBoxLayout();
-    layoutPrincipal->addLayout(layoutRegistros);
+    // filtro por dificultad (TODOS por defecto)
+    filtroDificultad = new QComboBox(this);
+    filtroDificultad->addItem("TODOS");
+    filtroDificultad->addItem("FÁCIL");
+    filtroDificultad->addItem("MEDIO");
+    filtroDificultad->addItem("DIFÍCIL");
+    filtroDificultad->addItem("PERSONALIZADO");
+    filtroDificultad->setMinimumHeight(40);
+    filtroDificultad->setMaximumWidth(280);
+    filtroDificultad->setStyleSheet(Estilos::combo());
+    connect(filtroDificultad, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            [this](int) { actualizarRecords(); });
+    layoutPrincipal->addWidget(filtroDificultad, 0, Qt::AlignHCenter);
+
+    // área con scroll: con muchos puntajes las tarjetas se desplazan
+    // y el botón VOLVER siempre queda visible
+    QScrollArea *areaDesplazamiento = new QScrollArea(this);
+    areaDesplazamiento->setWidgetResizable(true);
+    areaDesplazamiento->setFrameShape(QFrame::NoFrame);
+    areaDesplazamiento->setStyleSheet("QScrollArea { background: transparent; border: none; }");
+    contenedorRegistros = new QWidget(areaDesplazamiento);
+    contenedorRegistros->setStyleSheet("background: transparent;");
+    layoutRegistros = new QVBoxLayout(contenedorRegistros);
+    layoutRegistros->setContentsMargins(0, 0, 0, 0);
+    layoutRegistros->setSpacing(8);
+    areaDesplazamiento->setWidget(contenedorRegistros);
+    layoutPrincipal->addWidget(areaDesplazamiento, 1);
 
     QPushButton *botonVolver=new QPushButton("<- VOLVER",this);
     botonVolver->setMinimumHeight(50);
@@ -42,7 +68,6 @@ VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
         emit volverSolicitado();
     });
 
-    layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonVolver);
 
     actualizarRecords();
@@ -67,10 +92,11 @@ void VentanaRecords::actualizarRecords(){
     gestorPuntajes.cargarPuntajes();
     int cantidad=gestorPuntajes.getCantidadRegistros();
     if(cantidad==0){
-        QLabel *etiquetaVacio=new QLabel("Todavía no hay puntajes guardados",this);
+        QLabel *etiquetaVacio=new QLabel("Todavía no hay puntajes guardados",contenedorRegistros);
         etiquetaVacio->setStyleSheet(Estilos::textoSuave(13));
         etiquetaVacio->setAlignment(Qt::AlignCenter);
         layoutRegistros->addWidget(etiquetaVacio);
+        layoutRegistros->addStretch();
         return;
     }
 
@@ -85,10 +111,25 @@ void VentanaRecords::actualizarRecords(){
                   return a.puntaje > b.puntaje;
               });
 
+    // filtro por dificultad: FÁCIL=8x8, MEDIO=16x16, DIFÍCIL=16x30, el resto es personalizado
+    QString filtro = filtroDificultad ? filtroDificultad->currentText() : "TODOS";
+    int mostrados = 0;
+
     for(const RegistroPuntaje &registro : registros){
+        QString dificultadRegistro = QString::fromStdString(registro.dificultad);
+        bool coincide = filtro == "TODOS"
+                        || (filtro == "FÁCIL" && dificultadRegistro == "8x8")
+                        || (filtro == "MEDIO" && dificultadRegistro == "16x16")
+                        || (filtro == "DIFÍCIL" && dificultadRegistro == "16x30")
+                        || (filtro == "PERSONALIZADO" && dificultadRegistro != "8x8"
+                            && dificultadRegistro != "16x16" && dificultadRegistro != "16x30");
+        if(!coincide){
+            continue;
+        }
+        mostrados++;
 
         // tarjeta por partida: contenedor con fondo y bordes redondeados
-        QFrame *tarjeta=new QFrame(this);
+        QFrame *tarjeta=new QFrame(contenedorRegistros);
         tarjeta->setStyleSheet("background-color: #34495e; border-radius: 10px;");
         QHBoxLayout *layoutTarjeta=new QHBoxLayout(tarjeta);
         layoutTarjeta->setContentsMargins(12, 8, 12, 8);
@@ -153,4 +194,12 @@ void VentanaRecords::actualizarRecords(){
 
         layoutRegistros->addWidget(tarjeta);
     }
+
+    if(mostrados == 0){
+        QLabel *etiquetaVacio=new QLabel("No hay puntajes para este filtro",contenedorRegistros);
+        etiquetaVacio->setStyleSheet(Estilos::textoSuave(13));
+        etiquetaVacio->setAlignment(Qt::AlignCenter);
+        layoutRegistros->addWidget(etiquetaVacio);
+    }
+    layoutRegistros->addStretch();
 }

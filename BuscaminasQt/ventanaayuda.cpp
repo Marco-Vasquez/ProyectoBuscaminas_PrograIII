@@ -15,6 +15,7 @@ VentanaAyuda::VentanaAyuda(QWidget* parent):QWidget(parent) {
 
     QFrame* tarjeta=new QFrame(this);
     tarjeta->setStyleSheet(Estilos::tarjeta());
+    tarjeta->setMaximumWidth(560); // no se estira en pantallas anchas
     QVBoxLayout* layoutTarjeta=new QVBoxLayout(tarjeta);
     layoutTarjeta->setContentsMargins(24,20,24,20);
 
@@ -42,7 +43,7 @@ VentanaAyuda::VentanaAyuda(QWidget* parent):QWidget(parent) {
 
     layoutPrincipal->addWidget(etiquetaTitulo);
     layoutPrincipal->addSpacing(10);
-    layoutPrincipal->addWidget(tarjeta);
+    layoutPrincipal->addWidget(tarjeta, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonVolver);
 }

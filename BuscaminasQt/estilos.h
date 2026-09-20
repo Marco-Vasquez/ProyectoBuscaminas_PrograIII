@@ -4,7 +4,6 @@
 #include <QColor>
 
 // Tema visual compartido por todas las pantallas (oscuro, moderno).
-// Solo estilos: no cambia ninguna lógica del programa.
 namespace Estilos {
 
 inline const QString FONDO = "#1e272e";         // fondo general de pantallas
@@ -42,11 +41,11 @@ inline QString fondoPantalla()
 inline QString boton(const QString &color, int alto = 50)
 {
     return QString(
-        "QPushButton { background-color: %1; color: white; border: none;"
-        " border-radius: 10px; font-weight: bold; font-size: 13px; padding: 10px; }"
-        "QPushButton:hover { background-color: %2; }"
-        "QPushButton:pressed { background-color: %3; }"
-        "QPushButton:disabled { background-color: #3d4a55; color: #7f8c8d; }")
+               "QPushButton { background-color: %1; color: white; border: none;"
+               " border-radius: 10px; font-weight: bold; font-size: 13px; padding: 10px; }"
+               "QPushButton:hover { background-color: %2; }"
+               "QPushButton:pressed { background-color: %3; }"
+               "QPushButton:disabled { background-color: #3d4a55; color: #7f8c8d; }")
         .arg(color, aclarar(color), oscurecer(color));
 }
 
@@ -60,27 +59,28 @@ inline QString botonSecundario(int alto = 50)
 inline QString campoTexto()
 {
     return QString(
-        "QLineEdit { background-color: %1; color: %2; border: 2px solid #3d4a55;"
-        " border-radius: 8px; padding: 8px; font-size: 13px; }"
-        "QLineEdit:focus { border-color: %3; }")
+               "QLineEdit { background-color: %1; color: %2; border: 1px solid #3d4a55;"
+               " border-radius: 8px; padding: 9px 12px; font-size: 13px;"
+               " selection-background-color: %3; }"
+               "QLineEdit:focus { border: 1px solid %3; }")
         .arg(FONDO, TEXTO, AZUL);
 }
 
 // etiqueta de título grande
 inline QString titulo(int tamano = 22)
 {
-    return QString("color: %1; font-weight: bold; font-size: %2px;").arg(TEXTO).arg(tamano);
+    return QString("color: %1; font-weight: bold; font-size: %2px; background: transparent;").arg(TEXTO).arg(tamano);
 }
 
 // etiqueta de texto normal
 inline QString texto(int tamano = 12)
 {
-    return QString("color: %1; font-size: %2px;").arg(TEXTO).arg(tamano);
+    return QString("color: %1; font-size: %2px; background: transparent;").arg(TEXTO).arg(tamano);
 }
 
 inline QString textoSuave(int tamano = 11)
 {
-    return QString("color: %1; font-size: %2px;").arg(TEXTO_SUAVE).arg(tamano);
+    return QString("color: %1; font-size: %2px; background: transparent;").arg(TEXTO_SUAVE).arg(tamano);
 }
 
 // tarjeta contenedora
@@ -93,11 +93,11 @@ inline QString tarjeta()
 inline QString combo()
 {
     return QString(
-        "QComboBox { background-color: %1; color: %2; border: 2px solid #3d4a55;"
-        " border-radius: 8px; padding: 8px; font-size: 13px; }"
-        "QComboBox::drop-down { border: none; width: 24px; }"
-        "QComboBox QAbstractItemView { background-color: %1; color: %2;"
-        " selection-background-color: %3; selection-color: white; }")
+               "QComboBox { background-color: %1; color: %2; border: 2px solid #3d4a55;"
+               " border-radius: 8px; padding: 8px; font-size: 13px; }"
+               "QComboBox::drop-down { border: none; width: 24px; }"
+               "QComboBox QAbstractItemView { background-color: %1; color: %2;"
+               " selection-background-color: %3; selection-color: white; }")
         .arg(FONDO, TEXTO, AZUL);
 }
 
@@ -105,10 +105,10 @@ inline QString combo()
 inline QString slider()
 {
     return QString(
-        "QSlider::groove:horizontal { height: 6px; background: #3d4a55; border-radius: 3px; }"
-        "QSlider::handle:horizontal { width: 18px; height: 18px; margin: -6px 0;"
-        " background: %1; border-radius: 9px; }"
-        "QSlider::handle:horizontal:hover { background: %2; }")
+               "QSlider::groove:horizontal { height: 6px; background: #3d4a55; border-radius: 3px; }"
+               "QSlider::handle:horizontal { width: 18px; height: 18px; margin: -6px 0;"
+               " background: %1; border-radius: 9px; }"
+               "QSlider::handle:horizontal:hover { background: %2; }")
         .arg(AZUL, aclarar(AZUL));
 }
 

@@ -7,6 +7,7 @@ public:
     Tablero(int filas,int columnas,int cantMinas);
     ~Tablero();
     void abrirCelda(int fila,int columna);
+    void hacerChording(int fila,int columna);
     void alternarBandera(int fila,int columna);
     bool estaDentroDelTablero(int fila,int columna) const;
     Celda& obtenerCelda(int fila,int columna) const;

@@ -29,8 +29,10 @@ VentanaDerrota::VentanaDerrota(QWidget *parent):QWidget(parent) {
     QPushButton *botonReintentar = new QPushButton("REINTENTAR", this);
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENÚ", this);
     botonReintentar->setMinimumHeight(50);
+    botonReintentar->setMaximumWidth(380);
     botonReintentar->setStyleSheet(Estilos::boton(Estilos::ROJO));
     botonVolver->setMinimumHeight(50);
+    botonVolver->setMaximumWidth(380);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonReintentar, &QPushButton::clicked, this, [this]() { emit reintentarSolicitado(); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
@@ -40,8 +42,8 @@ VentanaDerrota::VentanaDerrota(QWidget *parent):QWidget(parent) {
     layoutPrincipal->addWidget(etiquetaTiempo);
     layoutPrincipal->addWidget(etiquetaBanderas);
     layoutPrincipal->addSpacing(20);
-    layoutPrincipal->addWidget(botonReintentar);
-    layoutPrincipal->addWidget(botonVolver);
+    layoutPrincipal->addWidget(botonReintentar, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
 }
 VentanaDerrota::~VentanaDerrota() {}

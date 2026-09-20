@@ -25,6 +25,7 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
     // tarjeta con los controles de audio
     QFrame* tarjeta=new QFrame(this);
     tarjeta->setStyleSheet(Estilos::tarjeta());
+    tarjeta->setMaximumWidth(560); // no se estira en pantallas anchas
     QVBoxLayout* layoutTarjeta=new QVBoxLayout(tarjeta);
     layoutTarjeta->setContentsMargins(24,20,24,20);
     layoutTarjeta->setSpacing(8);
@@ -82,7 +83,7 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
     layoutPrincipal->addWidget(etiquetaTitulo);
     layoutPrincipal->addWidget(etiquetaSubtitulo);
     layoutPrincipal->addSpacing(16);
-    layoutPrincipal->addWidget(tarjeta);
+    layoutPrincipal->addWidget(tarjeta, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonVolver);
     layoutPrincipal->addSpacing(8);

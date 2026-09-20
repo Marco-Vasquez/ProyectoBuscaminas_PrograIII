@@ -33,6 +33,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
 
     QFrame *tarjeta = new QFrame(this);
     tarjeta->setStyleSheet(Estilos::tarjeta());
+    tarjeta->setMaximumWidth(460); // no se estira en pantallas anchas
     QVBoxLayout *layoutTarjeta = new QVBoxLayout(tarjeta);
     layoutTarjeta->setContentsMargins(24, 24, 24, 24);
     layoutTarjeta->setSpacing(12);
@@ -123,7 +124,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
     layoutPrincipal->addWidget(etiquetaTitulo);
     layoutPrincipal->addWidget(etiquetaSubtitulo);
     layoutPrincipal->addSpacing(16);
-    layoutPrincipal->addWidget(tarjeta);
+    layoutPrincipal->addWidget(tarjeta, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
     layoutPrincipal->addWidget(botonVolver);
     layoutPrincipal->addSpacing(8);

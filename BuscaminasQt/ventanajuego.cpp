@@ -61,6 +61,31 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     IndicadorIcono *iconoMina=new IndicadorIcono(TipoIcono::Mina,panelEncabezado);
     IndicadorIcono *iconoBandera=new IndicadorIcono(TipoIcono::Bandera,panelEncabezado);
 
+    // mute rápido: silencia música y efectos sin salir de la partida
+    QPushButton *botonMute = new QPushButton("MUTE", panelEncabezado);
+    botonMute->setCheckable(true);
+    botonMute->setMinimumHeight(30);
+    botonMute->setStyleSheet(
+        "QPushButton { background-color: #3d4a55; color: #ecf0f1; border: none;"
+        " border-radius: 8px; font-weight: bold; font-size: 11px; padding: 6px 12px; }"
+        "QPushButton:hover { background-color: #4a5a66; }"
+        "QPushButton:checked { background-color: #e74c3c; color: white; }");
+    connect(botonMute, &QPushButton::toggled, this, [this, botonMute](bool silenciado) {
+        if (!gestorAudio) return;
+        if (silenciado) {
+            // guarda los volúmenes actuales para restaurarlos al desmutear
+            botonMute->setProperty("volMusica", gestorAudio->getVolumenMusica());
+            botonMute->setProperty("volEfectos", gestorAudio->getVolumenEfectos());
+            gestorAudio->setVolumenMusica(0);
+            gestorAudio->setVolumenEfectos(0);
+            botonMute->setText("SONIDO OFF");
+        } else {
+            gestorAudio->setVolumenMusica(botonMute->property("volMusica").toInt());
+            gestorAudio->setVolumenEfectos(botonMute->property("volEfectos").toInt());
+            botonMute->setText("MUTE");
+        }
+    });
+
     layoutEncabezado->addWidget(etiquetaJugador);
     layoutEncabezado->addStretch();
     layoutEncabezado->addWidget(iconoMina);
@@ -70,6 +95,7 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     layoutEncabezado->addWidget(etiquetaBanderas);
     layoutEncabezado->addStretch();
     layoutEncabezado->addWidget(etiquetaTiempo);
+    layoutEncabezado->addWidget(botonMute);
 
     escena = new QGraphicsScene(this);
     vista = new VistaJuego(this);
@@ -184,7 +210,14 @@ void VentanaJuego::manejarClicIzquierdo(int fila, int columna)
     double probabilidadMinaAntes = celdasSinAbrirAntes > 0
                                        ? static_cast<double>(minasRestantesAntes) / celdasSinAbrirAntes
                                        : 0.0;
-    tablero->abrirCelda(fila, columna);
+    // clic izquierdo sobre un número ya revelado = chording (abre los
+    // vecinos automáticamente si ya están todos marcados con bandera);
+    // sobre una celda cerrada, la abre como siempre
+    if (celda.estaRevelada()) {
+        tablero->hacerChording(fila, columna);
+    } else {
+        tablero->abrirCelda(fila, columna);
+    }
     dibujarTablero();
     if (tablero->juegoPerdido()) {
         finalizarPartida(false);

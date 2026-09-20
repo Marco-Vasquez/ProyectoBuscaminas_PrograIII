@@ -7,6 +7,7 @@
 #include "ventanavictoria.h"
 #include "ventanaderrota.h"
 #include "ventanaopciones.h"
+#include "ventanaayuda.h"
 #include "gestormedallas.h"
 #include "gestoraudio.h"
 #include "estilos.h"
@@ -24,7 +25,11 @@
 BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Buscaminas - Menú Principal");
-    resize(700, 550);
+    // Antes: setFixedSize(720, 580) — bloqueaba maximizar/redimensionar
+    // por completo. Las pantallas ya no se estiran gracias al
+    // setMaximumWidth() + centrado de cada tarjeta (ver VentanaLogin,
+    // RegistroUsuario, etc.), así que alcanza con un tamaño inicial.
+    resize(720, 580);
 
     panelPrincipal = new QStackedWidget(this);
     setCentralWidget(panelPrincipal);
@@ -57,12 +62,12 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     etiquetaMedallaDiamante = new QLabel("DIAMANTE", pantallaMenu);
     etiquetaMedallaValiente=new QLabel("VALIENTE",pantallaMenu);
     struct { QLabel *icono; QLabel *nombre; } medallas[] = {
-        {etiquetaIconoBronce, etiquetaMedallaBronce},
-        {etiquetaIconoPlata, etiquetaMedallaPlata},
-        {etiquetaIconoOro, etiquetaMedallaOro},
-        {etiquetaIconoDiamante, etiquetaMedallaDiamante},
-        {etiquetaIconoValiente, etiquetaMedallaValiente},
-    };
+                     {etiquetaIconoBronce, etiquetaMedallaBronce},
+                     {etiquetaIconoPlata, etiquetaMedallaPlata},
+                     {etiquetaIconoOro, etiquetaMedallaOro},
+                     {etiquetaIconoDiamante, etiquetaMedallaDiamante},
+                     {etiquetaIconoValiente, etiquetaMedallaValiente},
+                     };
     for (auto &m : medallas) {
         QFrame *tarjetaMedalla = new QFrame(pantallaMenu);
         tarjetaMedalla->setStyleSheet(Estilos::tarjeta());
@@ -89,6 +94,8 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     botonRecords->setStyleSheet(Estilos::boton(Estilos::MORADO));
     botonOpciones->setMinimumHeight(50);
     botonOpciones->setStyleSheet(Estilos::boton(Estilos::TURQUESA));
+    botonAyuda->setMinimumHeight(50);
+    botonAyuda->setStyleSheet(Estilos::boton(Estilos::AZUL));
     botonCerrarSesion->setMinimumHeight(50);
     botonCerrarSesion->setStyleSheet(Estilos::boton(Estilos::NARANJA));
     botonSalir->setMinimumHeight(50);
@@ -140,13 +147,28 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     connect(panelPrincipal, &QStackedWidget::currentChanged, this, [this](int) {
         QWidget *actual = panelPrincipal->currentWidget();
         if (actual == pantallaMenu) {
+            setWindowTitle("Buscaminas - Menú Principal");
             actualizarMedallas();
             etiquetaSesion->setText(QString("¡Hola, %1!").arg(nombreUsuarioActual));
             gestorAudio->iniciarMusicaMenu();
         } else if (actual == ventanaLogin) {
+            setWindowTitle("Buscaminas - Iniciar Sesión");
             gestorAudio->detenerMusica();
         } else if (actual == ventanaDerrota || actual == ventanaVictoria) {
+            setWindowTitle(actual == ventanaVictoria ? "Buscaminas - ¡Victoria!" : "Buscaminas - Derrota");
             gestorAudio->detenerMusica();
+        } else if (actual == ventanaSeleccionDificultad) {
+            setWindowTitle("Buscaminas - Seleccionar Dificultad");
+        } else if (actual == ventanaRegistroUsuario) {
+            setWindowTitle("Buscaminas - Registro");
+        } else if (actual == ventanaRecords) {
+            setWindowTitle("Buscaminas - Récords");
+        } else if (actual == ventanaOpciones) {
+            setWindowTitle("Buscaminas - Opciones");
+        } else if (actual == ventanaAyuda) {
+            setWindowTitle("Buscaminas - Ayuda");
+        } else if (actual == ventanaJuego) {
+            setWindowTitle("Buscaminas - Partida");
         }
     });
     connect(botonAyuda,&QPushButton::clicked,this,[this](){
@@ -228,8 +250,8 @@ void BuscaminasMain::actualizarMedallas(){
         // PNG real de la medalla; gris (ninguna) si todavía no se ganó
         m.icono->setPixmap(cargarMedallaPixmap(obtenida ? QString(m.tipo) : "Ninguna", 44));
         m.nombre->setStyleSheet(obtenida
-            ? QString("color: %1; font-weight: bold; font-size: 10px;").arg(colorDeMedalla(m.tipo))
-            : "color: #5d6d6e; font-weight: bold; font-size: 10px;");
+                                    ? QString("color: %1; font-weight: bold; font-size: 10px;").arg(colorDeMedalla(m.tipo))
+                                    : "color: #5d6d6e; font-weight: bold; font-size: 10px;");
     }
 }
 void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)

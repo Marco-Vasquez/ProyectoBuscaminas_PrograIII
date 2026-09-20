@@ -4,6 +4,13 @@ using namespace std;
 Tablero::Tablero(int filas,int columnas,int cantMinas)
     :filas(filas),columnas(columnas),cantMinas(cantMinas),minasSembradas(false),perdio(false),banderasColocadas(0)
 {
+    int maximoMinas = filas * columnas - 1;
+    if (this->cantMinas > maximoMinas) {
+        this->cantMinas = maximoMinas;
+    }
+    if (this->cantMinas < 0) {
+        this->cantMinas = 0;
+    }
     matriz=new Celda* [filas];
     for(int i=0;i<filas;i++){
         matriz[i]=new Celda[columnas];
@@ -91,6 +98,50 @@ void Tablero::abrirCelda(int fila,int columna){
                 continue;
             }
             abrirCelda(fila+deltaFila,columna+deltaCol);
+        }
+    }
+}
+void Tablero::hacerChording(int fila,int columna){
+    if(!estaDentroDelTablero(fila,columna)){
+        return;
+    }
+    Celda &celda=matriz[fila][columna];
+    // el chording solo aplica sobre un número ya revelado (celdas en 0 no
+    // tienen sentido: no muestran vecinos con mina que contar)
+    if(!celda.estaRevelada() || celda.getMinasVecinas()==0){
+        return;
+    }
+    int banderasVecinas=0;
+    for(int deltaFila=-1;deltaFila<=1;deltaFila++){
+        for(int deltaCol=-1;deltaCol<=1;deltaCol++){
+            if(deltaFila==0 && deltaCol==0){
+                continue;
+            }
+            int filaVecina=fila+deltaFila;
+            int colVecina=columna+deltaCol;
+            if(estaDentroDelTablero(filaVecina,colVecina) && matriz[filaVecina][colVecina].tieneBandera()){
+                banderasVecinas++;
+            }
+        }
+    }
+    // si las banderas puestas no coinciden exactamente con el número, no se
+    // abre nada — evita perder por accidente con una bandera mal puesta
+    if(banderasVecinas!=celda.getMinasVecinas()){
+        return;
+    }
+    for(int deltaFila=-1;deltaFila<=1;deltaFila++){
+        for(int deltaCol=-1;deltaCol<=1;deltaCol++){
+            if(deltaFila==0 && deltaCol==0){
+                continue;
+            }
+            int filaVecina=fila+deltaFila;
+            int colVecina=columna+deltaCol;
+            if(estaDentroDelTablero(filaVecina,colVecina)){
+                Celda &vecina=matriz[filaVecina][colVecina];
+                if(!vecina.estaRevelada() && !vecina.tieneBandera()){
+                    abrirCelda(filaVecina,colVecina);
+                }
+            }
         }
     }
 }

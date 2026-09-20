@@ -35,8 +35,10 @@ VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
     botonSiguienteNivel = new QPushButton("SIGUIENTE NIVEL", this);
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENÚ", this);
     botonSiguienteNivel->setMinimumHeight(50);
+    botonSiguienteNivel->setMaximumWidth(380);
     botonSiguienteNivel->setStyleSheet(Estilos::boton(Estilos::VERDE));
     botonVolver->setMinimumHeight(50);
+    botonVolver->setMaximumWidth(380);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonSiguienteNivel, &QPushButton::clicked, this, [this]() { emit siguienteNivelSolicitado(); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
@@ -48,8 +50,8 @@ VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
     layoutPrincipal->addWidget(etiquetaBanderas);
     layoutPrincipal->addWidget(etiquetaMedalla);
     layoutPrincipal->addSpacing(20);
-    layoutPrincipal->addWidget(botonSiguienteNivel);
-    layoutPrincipal->addWidget(botonVolver);
+    layoutPrincipal->addWidget(botonSiguienteNivel, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
 }
 VentanaVictoria::~VentanaVictoria() {}
