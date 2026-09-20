@@ -18,6 +18,7 @@ private:
     QLabel *etiquetaBanderas;
     QLabel *etiquetaMedalla;
     QPushButton *botonSiguienteNivel;
+    QLabel* etiquetaIconoMedalla;
 };
 
 #endif // VENTANAVICTORIA_H

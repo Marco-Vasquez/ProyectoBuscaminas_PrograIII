@@ -11,6 +11,7 @@
 #include "gestoraudio.h"
 #include "estilos.h"
 #include "medallaimagen.h"
+#include "ventanaayuda.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -79,6 +80,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     QPushButton *botonJugar = new QPushButton("JUGAR", pantallaMenu);
     QPushButton *botonRecords = new QPushButton("RÉCORDS", pantallaMenu);
     QPushButton *botonOpciones = new QPushButton("OPCIONES", pantallaMenu);
+    QPushButton *botonAyuda=new QPushButton("AYUDA",pantallaMenu);
     QPushButton *botonCerrarSesion = new QPushButton("CERRAR SESIÓN", pantallaMenu);
     QPushButton *botonSalir = new QPushButton("SALIR", pantallaMenu);
     botonJugar->setMinimumHeight(60);
@@ -109,6 +111,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     ventanaDerrota = new VentanaDerrota(panelPrincipal);
     gestorAudio = new GestorAudio(this);
     ventanaOpciones = new VentanaOpciones(gestorAudio, panelPrincipal);
+    ventanaAyuda=new VentanaAyuda(panelPrincipal);
 
     panelPrincipal->addWidget(ventanaLogin);
     panelPrincipal->addWidget(pantallaMenu);
@@ -118,6 +121,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     panelPrincipal->addWidget(ventanaVictoria);
     panelPrincipal->addWidget(ventanaDerrota);
     panelPrincipal->addWidget(ventanaOpciones);
+    panelPrincipal->addWidget(ventanaAyuda);
 
     //login es punto de entrada antes de llegar al menú.
     panelPrincipal->setCurrentWidget(ventanaLogin);
@@ -144,6 +148,12 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         } else if (actual == ventanaDerrota || actual == ventanaVictoria) {
             gestorAudio->detenerMusica();
         }
+    });
+    connect(botonAyuda,&QPushButton::clicked,this,[this](){
+        panelPrincipal->setCurrentWidget(ventanaAyuda);
+    });
+    connect(ventanaAyuda,&VentanaAyuda::volverSolicitado,this,[this](){
+        panelPrincipal->setCurrentWidget(pantallaMenu);
     });
     connect(ventanaVictoria, &VentanaVictoria::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
     connect(ventanaVictoria, &VentanaVictoria::siguienteNivelSolicitado, this, [this]() {

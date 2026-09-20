@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QFont>
+#include "medallaimagen.h"
 VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
     setStyleSheet(Estilos::fondoPantalla());
 
@@ -20,6 +21,9 @@ VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
     etiquetaTiempo = new QLabel(this);
     etiquetaBanderas = new QLabel(this);
     etiquetaMedalla = new QLabel(this);
+    etiquetaIconoMedalla=new QLabel(this);
+    etiquetaIconoMedalla->setAlignment(Qt::AlignCenter);
+    etiquetaIconoMedalla->setFixedHeight(70);
     for (QLabel *etiqueta : {etiquetaTiempo, etiquetaBanderas, etiquetaMedalla}) {
         etiqueta->setAlignment(Qt::AlignCenter);
         QFont fuente = etiqueta->font();
@@ -37,6 +41,7 @@ VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
     connect(botonSiguienteNivel, &QPushButton::clicked, this, [this]() { emit siguienteNivelSolicitado(); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
     layoutPrincipal->addStretch();
+    layoutPrincipal->addWidget(etiquetaIconoMedalla);
     layoutPrincipal->addWidget(etiquetaTitulo);
     layoutPrincipal->addSpacing(15);
     layoutPrincipal->addWidget(etiquetaTiempo);
@@ -54,4 +59,12 @@ void VentanaVictoria::mostrarResultado(int segundos, int banderasColocadas, cons
     etiquetaBanderas->setText(QString("Banderas colocadas: %1").arg(banderasColocadas));
     etiquetaMedalla->setText(textoMedalla);
     botonSiguienteNivel->setVisible(haySiguienteNivel);
+    QString nombreMedalla;
+    if(textoMedalla.contains("Medalla obtenida:")){
+        nombreMedalla=textoMedalla.section(':',1).trimmed();
+    }
+    etiquetaIconoMedalla->setVisible(!nombreMedalla.isEmpty());
+    if(!nombreMedalla.isEmpty()){
+        etiquetaIconoMedalla->setPixmap(cargarMedallaPixmap(nombreMedalla,64));
+    }
 }

@@ -12,6 +12,7 @@ class VentanaVictoria;
 class VentanaDerrota;
 class GestorAudio;
 class VentanaOpciones;
+class VentanaAyuda;
 class BuscaminasMain : public QMainWindow
 {
     Q_OBJECT
@@ -44,5 +45,6 @@ private:
     QString nombreUsuarioActual="Jugador";
     QLabel* etiquetaIconoValiente=nullptr;
     QLabel* etiquetaMedallaValiente=nullptr;
+    VentanaAyuda* ventanaAyuda=nullptr;
 };
 #endif // BUSCAMINASMAIN_H

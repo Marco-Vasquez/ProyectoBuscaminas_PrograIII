@@ -34,6 +34,7 @@ qt_add_executable(BuscaminasQt
     ventanaopciones.h ventanaopciones.cpp
     estilos.h
     medallaimagen.h
+    ventanaayuda.h ventanaayuda.cpp
 
 
 )

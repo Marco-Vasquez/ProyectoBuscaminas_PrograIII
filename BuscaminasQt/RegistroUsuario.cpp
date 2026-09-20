@@ -9,7 +9,12 @@
 #include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
+#include <QCryptographicHash>
 #include <QDir>
+struct QString hashContrasena(const QString &contra){
+    QByteArray hash=QCryptographicHash::hash(contra.toUtf8(),QCryptographicHash::Sha256);
+    return QString::fromLatin1(hash.toHex());
+}
 RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
 {
     setStyleSheet(Estilos::fondoPantalla());
@@ -66,23 +71,44 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
         campoContrasena->setEchoMode(marcado ? QLineEdit::Normal : QLineEdit::Password);
         botonMostrarContrasena->setText(marcado ? "Ocultar contraseña" : "Mostrar contraseña");
     });
-    connect(botonRegistrar, &QPushButton::clicked, this, [this, campoUsuario, campoContrasena]() {
-        QString nombreUsuario = campoUsuario->text().trimmed();
-        QString contrasena = campoContrasena->text();
-        if (nombreUsuario.isEmpty() || contrasena.isEmpty()) {
-            etiquetaError->setText("Debés ingresar usuario y contraseña.");
+    connect(botonRegistrar,&QPushButton::clicked,this,[this,campoUsuario,campoContrasena](){
+        QString nombreUsuario=campoUsuario->text().trimmed();
+        QString contrasena=campoContrasena->text();
+        if(nombreUsuario.isEmpty() || contrasena.isEmpty()){
+            etiquetaError->setText("Debés ingresar usuario y contraseña");
             etiquetaError->show();
             return;
         }
-        QFile archivo(QDir(QCoreApplication::applicationDirPath()).filePath("usuarios.txt"));
-        if (archivo.open(QIODevice::Append | QIODevice::Text)) {
+        QString rutaArchivo=QDir(QCoreApplication::applicationDirPath()).filePath("usuarios.txt");
+        //verificacion de que el usuario no exista
+        QFile archivoLectura(rutaArchivo);
+        if(archivoLectura.open(QIODevice::ReadOnly | QIODevice::Text)){
+            QTextStream flujoLectura(&archivoLectura);
+            while(!flujoLectura.atEnd()){
+                QString linea=flujoLectura.readLine();
+                int posicionEspacio=linea.indexOf(' ');
+                if(posicionEspacio==-1){
+                    continue;
+                }
+                QString usuarioExistente=linea.left(posicionEspacio);
+                if(usuarioExistente.compare(nombreUsuario,Qt::CaseInsensitive)==0){
+                    archivoLectura.close();
+                    etiquetaError->setText("Ese nombre de usuario ya existe. Elige otro nombre");
+                    etiquetaError->show();
+                    return;
+                }
+            }
+            archivoLectura.close();
+        }
+        QFile archivo(rutaArchivo);
+        if(archivo.open(QIODevice::Append | QIODevice::Text)){
             QTextStream flujo(&archivo);
-            flujo << nombreUsuario << " " << contrasena << "\n";
+            flujo<<nombreUsuario<<" "<<hashContrasena(contrasena)<<"\n";
             archivo.close();
         }
+        etiquetaError->hide();
         campoUsuario->clear();
         campoContrasena->clear();
-        etiquetaError->hide();
         emit registroCompletado(nombreUsuario);
     });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });

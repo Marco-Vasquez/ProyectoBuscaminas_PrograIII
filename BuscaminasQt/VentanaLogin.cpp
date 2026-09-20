@@ -8,8 +8,15 @@
 #include <QFont>
 #include <QFile>
 #include <QTextStream>
+#include <QCryptographicHash>
 #include <QCoreApplication>
 #include <QDir>
+
+
+static QString hashContrasena(const QString &contra){
+    QByteArray hash=QCryptographicHash::hash(contra.toUtf8(),QCryptographicHash::Sha256);
+    return QString::fromLatin1(hash.toHex());
+}
 
 VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
 {
@@ -134,11 +141,13 @@ void VentanaLogin::limpiarCampos()
 
 bool VentanaLogin::validarCredenciales(const QString &usuario, const QString &contrasena) const
 {
-    // Mismo archivo y mismo formato
-    QFile archivo(QDir(QCoreApplication::applicationDirPath()).filePath("usuarios.txt"));
+    QString ruta = QDir(QCoreApplication::applicationDirPath()).filePath("usuarios.txt");
+    QFile archivo(ruta);
     if (!archivo.open(QIODevice::ReadOnly | QIODevice::Text)) {
         return false;
     }
+
+    QString contrasenaHasheada = hashContrasena(contrasena);
 
     QTextStream flujo(&archivo);
     bool encontrado = false;
@@ -150,7 +159,7 @@ bool VentanaLogin::validarCredenciales(const QString &usuario, const QString &co
         }
         QString usuarioGuardado = linea.left(posicionEspacio);
         QString contrasenaGuardada = linea.mid(posicionEspacio + 1);
-        if (usuarioGuardado == usuario && contrasenaGuardada == contrasena) {
+        if (usuarioGuardado == usuario && contrasenaGuardada == contrasenaHasheada) {
             encontrado = true;
         }
     }

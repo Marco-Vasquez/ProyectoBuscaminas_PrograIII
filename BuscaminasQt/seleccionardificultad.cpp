@@ -159,5 +159,7 @@ void SeleccionarDificultad::actualizarNivelesDesbloqueados(bool medioDesbloquead
     botonMedio->setEnabled(medioDesbloqueado);
     botonDificil->setEnabled(dificilDesbloqueado);
     // el estilo :disabled del tema ya los muestra grises y bloqueados
+    botonMedio->setToolTip(medioDesbloqueado ? "":"Gana la medalla de Bronce para desbloquear este nivel");
+    botonDificil->setToolTip(dificilDesbloqueado ? "":"Gana la medalla de Plata para desbloquear este nivel");
 }
 SeleccionarDificultad::~SeleccionarDificultad() {}
