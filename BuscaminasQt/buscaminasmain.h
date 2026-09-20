@@ -42,5 +42,7 @@ private:
     void abrirPartida(int filas,int columnas,int minas);
     void actualizarMedallas();
     QString nombreUsuarioActual="Jugador";
+    QLabel* etiquetaIconoValiente=nullptr;
+    QLabel* etiquetaMedallaValiente=nullptr;
 };
 #endif // BUSCAMINASMAIN_H

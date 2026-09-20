@@ -49,15 +49,18 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     etiquetaIconoPlata = new QLabel(pantallaMenu);
     etiquetaIconoOro = new QLabel(pantallaMenu);
     etiquetaIconoDiamante = new QLabel(pantallaMenu);
+    etiquetaIconoValiente=new QLabel(pantallaMenu);
     etiquetaMedallaBronce = new QLabel("BRONCE", pantallaMenu);
     etiquetaMedallaPlata = new QLabel("PLATA", pantallaMenu);
     etiquetaMedallaOro = new QLabel("ORO", pantallaMenu);
     etiquetaMedallaDiamante = new QLabel("DIAMANTE", pantallaMenu);
+    etiquetaMedallaValiente=new QLabel("VALIENTE",pantallaMenu);
     struct { QLabel *icono; QLabel *nombre; } medallas[] = {
         {etiquetaIconoBronce, etiquetaMedallaBronce},
         {etiquetaIconoPlata, etiquetaMedallaPlata},
         {etiquetaIconoOro, etiquetaMedallaOro},
         {etiquetaIconoDiamante, etiquetaMedallaDiamante},
+        {etiquetaIconoValiente, etiquetaMedallaValiente},
     };
     for (auto &m : medallas) {
         QFrame *tarjetaMedalla = new QFrame(pantallaMenu);
@@ -208,6 +211,7 @@ void BuscaminasMain::actualizarMedallas(){
                      {etiquetaIconoPlata, etiquetaMedallaPlata, "Plata"},
                      {etiquetaIconoOro, etiquetaMedallaOro, "Oro"},
                      {etiquetaIconoDiamante, etiquetaMedallaDiamante, "Diamante"},
+                     {etiquetaIconoValiente, etiquetaMedallaValiente, "Valiente"},
                      };
     for(auto &m:medallas){
         bool obtenida=gestorMedallas.tieneMedalla(usuario,m.tipo);
