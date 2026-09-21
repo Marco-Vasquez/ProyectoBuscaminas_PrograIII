@@ -100,6 +100,7 @@ void GestorAudio::reproducirMusica(const QString &archivo)
 }
 void GestorAudio::setVolumenMusica(int porcentaje){
     salidaAudio->setVolume(porcentaje/100.0f);
+    if (porcentaje > 0) muteado = false;
 }
 void GestorAudio::setVolumenEfectos(int porcentaje){
     volumenEfectosActual=porcentaje;
@@ -107,12 +108,32 @@ void GestorAudio::setVolumenEfectos(int porcentaje){
     efectoClic->setVolume(volumen);
     efectoBandera->setVolume(volumen);
     efectoExplosion->setVolume(volumen);
+    if (porcentaje > 0) muteado = false;
 }
 int GestorAudio::getVolumenMusica() const{
     return static_cast<int>(salidaAudio->volume()*100);
 }
 int GestorAudio::getVolumenEfectos() const{
     return volumenEfectosActual;
+}
+bool GestorAudio::estaMuteado() const{
+    return muteado;
+}
+void GestorAudio::setMuteado(bool silenciado){
+    if (muteado == silenciado) {
+        return;
+    }
+    if (silenciado) {
+        // guarda los niveles actuales para poder restaurarlos al desmutear
+        nivelMusicaPreMute = getVolumenMusica();
+        nivelEfectosPreMute = getVolumenEfectos();
+        setVolumenMusica(0);
+        setVolumenEfectos(0);
+    } else {
+        setVolumenMusica(nivelMusicaPreMute);
+        setVolumenEfectos(nivelEfectosPreMute);
+    }
+    muteado = silenciado;
 }
 int GestorAudio::getContadorClics() const { return contadorClics; }
 int GestorAudio::getContadorBanderas() const { return contadorBanderas; }

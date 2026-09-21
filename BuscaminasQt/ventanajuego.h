@@ -6,6 +6,7 @@
 class Tablero;
 class QGraphicsScene;
 class QLabel;
+class QPushButton;
 class VistaJuego;
 class celdagrafica;
 class GestorAudio;
@@ -46,6 +47,7 @@ private:
     int tamanioCelda;
     bool partidaTerminada;
     GestorAudio *gestorAudio = nullptr;
+    QPushButton *botonMute = nullptr;
 
     void construirCeldasGraficas();
     void dibujarTablero();

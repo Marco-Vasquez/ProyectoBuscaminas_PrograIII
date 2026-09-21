@@ -42,8 +42,6 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
 
     QFrame *panelEncabezado = new QFrame(this);
     panelEncabezado->setStyleSheet(Estilos::tarjeta());
-    panelEncabezado->setMinimumWidth(620); // ancho fijo: no se estira en pantallas anchas
-    panelEncabezado->setMaximumWidth(620);
     QHBoxLayout *layoutEncabezado = new QHBoxLayout(panelEncabezado);
     layoutEncabezado->setContentsMargins(14, 10, 14, 10);
     layoutEncabezado->setSpacing(8);
@@ -64,7 +62,7 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
     IndicadorIcono *iconoBandera=new IndicadorIcono(TipoIcono::Bandera,panelEncabezado);
 
     // mute rápido: silencia música y efectos sin salir de la partida
-    QPushButton *botonMute = new QPushButton("MUTE", panelEncabezado);
+    botonMute = new QPushButton("MUTE", panelEncabezado);
     botonMute->setCheckable(true);
     botonMute->setMinimumHeight(30);
     botonMute->setStyleSheet(
@@ -72,20 +70,10 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
         " border-radius: 8px; font-weight: bold; font-size: 11px; padding: 6px 12px; }"
         "QPushButton:hover { background-color: #4a5a66; }"
         "QPushButton:checked { background-color: #e74c3c; color: white; }");
-    connect(botonMute, &QPushButton::toggled, this, [this, botonMute](bool silenciado) {
+    connect(botonMute, &QPushButton::toggled, this, [this](bool silenciado) {
         if (!gestorAudio) return;
-        if (silenciado) {
-            // guarda los volúmenes actuales para restaurarlos al desmutear
-            botonMute->setProperty("volMusica", gestorAudio->getVolumenMusica());
-            botonMute->setProperty("volEfectos", gestorAudio->getVolumenEfectos());
-            gestorAudio->setVolumenMusica(0);
-            gestorAudio->setVolumenEfectos(0);
-            botonMute->setText("SONIDO OFF");
-        } else {
-            gestorAudio->setVolumenMusica(botonMute->property("volMusica").toInt());
-            gestorAudio->setVolumenEfectos(botonMute->property("volEfectos").toInt());
-            botonMute->setText("MUTE");
-        }
+        gestorAudio->setMuteado(silenciado);
+        botonMute->setText(gestorAudio->estaMuteado() ? "SONIDO OFF" : "MUTE");
     });
 
     layoutEncabezado->addWidget(etiquetaJugador);
@@ -110,17 +98,15 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
 
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENU", this);
     botonVolver->setMinimumHeight(45);
-    botonVolver->setMinimumWidth(620); // ancho fijo: no se estira en pantallas anchas
-    botonVolver->setMaximumWidth(620);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonVolver, &QPushButton::clicked, this, [this]() {
         cronometro.detener();
         emit volverSolicitado();
     });
 
-    layoutPrincipal->addWidget(panelEncabezado, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(panelEncabezado);
     layoutPrincipal->addWidget(vista, 1);
-    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonVolver);
 
     connect(vista, &VistaJuego::celdaClicIzquierdo, this, &VentanaJuego::manejarClicIzquierdo);
     connect(vista, &VistaJuego::celdaClicDerecho, this, &VentanaJuego::manejarClicDerecho);
@@ -147,6 +133,12 @@ void VentanaJuego::setNombreJugador(const QString &nombre)
 void VentanaJuego::setGestorAudio(GestorAudio *audio)
 {
     gestorAudio = audio;
+    // refleja el estado global de mute para que el botón no mienta si el
+    // sonido quedó silenciado en una partida anterior
+    if (gestorAudio && botonMute) {
+        botonMute->setChecked(gestorAudio->estaMuteado());
+        botonMute->setText(gestorAudio->estaMuteado() ? "SONIDO OFF" : "MUTE");
+    }
 }
 
 int VentanaJuego::getSegundosTranscurridos() const

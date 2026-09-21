@@ -25,6 +25,11 @@ public:
     int getVolumenMusica() const;
     int getVolumenEfectos() const;
 
+    // silenciamiento global: guarda los niveles actuales y los restaura
+    // al desmutear, sin importar en qué pantalla se encuentre el jugador
+    bool estaMuteado() const;
+    void setMuteado(bool silenciado);
+
     // contadores para verificar en pruebas que los efectos solo suenan cuando corresponde
     int getContadorClics() const;
     int getContadorBanderas() const;
@@ -41,6 +46,9 @@ private:
     int contadorExplosiones;
     void reproducirMusica(const QString &archivo);
     int volumenEfectosActual;
+    bool muteado = false;
+    int nivelMusicaPreMute = 50;
+    int nivelEfectosPreMute = 60;
 };
 
 #endif // GESTORAUDIO_H

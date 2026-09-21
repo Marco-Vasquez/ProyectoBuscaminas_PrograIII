@@ -53,7 +53,12 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     vistaUI->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     vistaUI->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     vistaUI->setBackgroundBrush(QColor(Estilos::FONDO));
-    setCentralWidget(vistaUI);
+
+    // primer nivel de páginas: la interfaz de menús (720x580 fija) y,
+    // encima, la partida que ocupa toda la ventana
+    contenedorPrincipal = new QStackedWidget(this);
+    contenedorPrincipal->addWidget(vistaUI);
+    setCentralWidget(contenedorPrincipal);
     panelPrincipal->setFixedSize(720, 580);
 
     // Menú principal
@@ -198,8 +203,6 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
             setWindowTitle("Buscaminas - Opciones");
         } else if (actual == ventanaAyuda) {
             setWindowTitle("Buscaminas - Ayuda");
-        } else if (actual == ventanaJuego) {
-            setWindowTitle("Buscaminas - Partida");
         }
     });
     connect(botonAyuda,&QPushButton::clicked,this,[this](){
@@ -223,11 +226,7 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         abrirPartida(filas, columnas, minas);
     });
     connect(botonCerrarSesion, &QPushButton::clicked, this, [this]() {
-        if (ventanaJuego) {
-            panelPrincipal->removeWidget(ventanaJuego);
-            ventanaJuego->deleteLater();
-            ventanaJuego = nullptr;
-        }
+        cerrarPantallaPartida();
         nombreUsuarioActual = "Jugador";
         ventanaLogin->limpiarCampos();
         panelPrincipal->setCurrentWidget(ventanaLogin);
@@ -281,16 +280,13 @@ void BuscaminasMain::actualizarMedallas(){
 }
 void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
 {
-    if (ventanaJuego) {
-        panelPrincipal->removeWidget(ventanaJuego);
-        ventanaJuego->deleteLater();
-        ventanaJuego = nullptr;
-    }
-    ventanaJuego = new VentanaJuego(filas, columnas, minas, panelPrincipal);
+    cerrarPantallaPartida();
+    ventanaJuego = new VentanaJuego(filas, columnas, minas, contenedorPrincipal);
     ventanaJuego->setNombreJugador(nombreUsuarioActual);
     ventanaJuego->setGestorAudio(gestorAudio);
 
     connect(ventanaJuego, &VentanaJuego::volverSolicitado, this, [this]() {
+        cerrarPantallaPartida();
         panelPrincipal->setCurrentWidget(pantallaMenu);
     });
     connect(ventanaJuego, &VentanaJuego::victoriaObtenida, this,
@@ -299,21 +295,45 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
                 ventanaVictoria->setProperty("columnasSig", columnasSig);
                 ventanaVictoria->setProperty("minasSig", minasSig);
                 ventanaVictoria->mostrarResultado(segundos, banderas, textoMedalla, haySiguiente);
+                cerrarPantallaPartida();
                 panelPrincipal->setCurrentWidget(ventanaVictoria);
             });
     connect(ventanaJuego, &VentanaJuego::derrotaObtenida, this,
             [this](int filas, int columnas, int minas) {
+                int segundos = ventanaJuego->getSegundosTranscurridos();
+                int banderas = ventanaJuego->getBanderasColocadas();
                 ventanaDerrota->setProperty("filasReintento", filas);
                 ventanaDerrota->setProperty("columnasReintento", columnas);
                 ventanaDerrota->setProperty("minasReintento", minas);
-                ventanaDerrota->mostrarResultado(ventanaJuego->getSegundosTranscurridos(),
-                                                 ventanaJuego->getBanderasColocadas());
+                ventanaDerrota->mostrarResultado(segundos, banderas);
+                cerrarPantallaPartida();
                 panelPrincipal->setCurrentWidget(ventanaDerrota);
             });
 
-    panelPrincipal->addWidget(ventanaJuego);
-    panelPrincipal->setCurrentWidget(ventanaJuego);
+    contenedorPrincipal->addWidget(ventanaJuego);
+    contenedorPrincipal->setCurrentWidget(ventanaJuego);
+    setWindowTitle("Buscaminas - Partida");
     gestorAudio->iniciarMusicaJuego();
+}
+
+void BuscaminasMain::cerrarPantallaPartida()
+{
+    // vuelve a mostrar la interfaz de menús y libera la partida actual
+    if (contenedorPrincipal) {
+        contenedorPrincipal->setCurrentWidget(vistaUI);
+    }
+    if (ventanaJuego) {
+        contenedorPrincipal->removeWidget(ventanaJuego);
+        ventanaJuego->deleteLater();
+        ventanaJuego = nullptr;
+    }
+    // la vista de menús estuvo oculta durante la partida; al volver a
+    // mostrarla se reajusta para que quede centrada y a escala correcta
+    QTimer::singleShot(0, this, [this]() {
+        if (vistaUI) {
+            vistaUI->fitInView(QRectF(0, 0, 720, 580), Qt::KeepAspectRatio);
+        }
+    });
 }
 BuscaminasMain::~BuscaminasMain() {}
 
