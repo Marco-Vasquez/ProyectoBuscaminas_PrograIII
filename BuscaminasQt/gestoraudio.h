@@ -5,8 +5,6 @@
 class QSoundEffect;
 class QMediaPlayer;
 class QAudioOutput;
-// centraliza los efectos de sonido (QSoundEffect) y la música de fondo (QMediaPlayer).
-//los efectos van en sonidos/ y la música en musica/ junto al ejecutable.
 class GestorAudio : public QObject
 {
     Q_OBJECT
@@ -25,8 +23,7 @@ public:
     int getVolumenMusica() const;
     int getVolumenEfectos() const;
 
-    // silenciamiento global: guarda los niveles actuales y los restaura
-    // al desmutear, sin importar en qué pantalla se encuentre el jugador
+
     bool estaMuteado() const;
     void setMuteado(bool silenciado);
 

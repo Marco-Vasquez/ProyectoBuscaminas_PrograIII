@@ -31,9 +31,6 @@ private:
     QGraphicsScene *escenaUI = nullptr;
     QGraphicsView *vistaUI = nullptr;
     QGraphicsProxyWidget *proxyUI = nullptr;
-    // contenedor de primer nivel: página 0 = interfaz de menús (escenaUI
-    // escalada 720x580), página 1 = la partida ocupando TODA la ventana
-    // (el tablero vuelve a crecer junto con la ventana como en versiones pasadas)
     QStackedWidget *contenedorPrincipal = nullptr;
     QWidget *pantallaMenu = nullptr;
     VentanaLogin *ventanaLogin = nullptr;
