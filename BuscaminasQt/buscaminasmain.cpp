@@ -32,18 +32,12 @@
 BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Buscaminas - Menú Principal");
-    // La interfaz se dibuja en una base fija de 720x580 y se escala con
-    // fitInView para que TODO crezca proporcionalmente al agrandar la
-    // ventana (botones, textos, tarjetas y tablero).
+
     resize(720, 580);
     setMinimumSize(480, 380);
 
-    // top-level (sin padre): QGraphicsScene::addWidget solo embebe bien
-    // widgets sin padre; con padre quedaba dibujado detrás del view y la
-    // ventana se veía completamente en blanco
+
     panelPrincipal = new QStackedWidget;
-    // el fondo de las páginas (stylesheet) no se pinta a través del proxy;
-    // se le da el fondo FONDO al stacked widget con paleta, que sí se pinta
     panelPrincipal->setAutoFillBackground(true);
     QPalette paletaPanel = panelPrincipal->palette();
     paletaPanel.setColor(QPalette::Window, QColor(Estilos::FONDO));
@@ -51,6 +45,8 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     escenaUI = new QGraphicsScene(this);
     proxyUI = escenaUI->addWidget(panelPrincipal);
     proxyUI->setGeometry(QRectF(0, 0, 720, 580)); // tamaño base fijo de la interfaz
+
+    escenaUI->setSceneRect(0, 0, 720, 580);
     vistaUI = new QGraphicsView(escenaUI, this);
     vistaUI->setFrameShape(QFrame::NoFrame);
     vistaUI->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -324,10 +320,7 @@ BuscaminasMain::~BuscaminasMain() {}
 void BuscaminasMain::resizeEvent(QResizeEvent *evento)
 {
     QMainWindow::resizeEvent(evento);
-    // escala la interfaz completa (base 720x580) para que ocupe la ventana
-    // entera manteniendo la proporción (igual que el tablero en la partida).
-    // Se reprograma con singleShot(0) porque en el resizeEvent el viewport
-    // todavía puede tener el tamaño viejo y el ajuste quedaría mal.
+
     if (vistaUI) {
         vistaUI->fitInView(QRectF(0, 0, 720, 580), Qt::KeepAspectRatio);
         QTimer::singleShot(0, this, [this]() {
