@@ -42,6 +42,8 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
 
     QFrame *panelEncabezado = new QFrame(this);
     panelEncabezado->setStyleSheet(Estilos::tarjeta());
+    panelEncabezado->setMinimumWidth(620); // ancho fijo: no se estira en pantallas anchas
+    panelEncabezado->setMaximumWidth(620);
     QHBoxLayout *layoutEncabezado = new QHBoxLayout(panelEncabezado);
     layoutEncabezado->setContentsMargins(14, 10, 14, 10);
     layoutEncabezado->setSpacing(8);
@@ -108,15 +110,17 @@ VentanaJuego::VentanaJuego(int filas, int columnas, int cantidadMinas, QWidget *
 
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENU", this);
     botonVolver->setMinimumHeight(45);
+    botonVolver->setMinimumWidth(620); // ancho fijo: no se estira en pantallas anchas
+    botonVolver->setMaximumWidth(620);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonVolver, &QPushButton::clicked, this, [this]() {
         cronometro.detener();
         emit volverSolicitado();
     });
 
-    layoutPrincipal->addWidget(panelEncabezado);
+    layoutPrincipal->addWidget(panelEncabezado, 0, Qt::AlignHCenter);
     layoutPrincipal->addWidget(vista, 1);
-    layoutPrincipal->addWidget(botonVolver);
+    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
 
     connect(vista, &VistaJuego::celdaClicIzquierdo, this, &VentanaJuego::manejarClicIzquierdo);
     connect(vista, &VistaJuego::celdaClicDerecho, this, &VentanaJuego::manejarClicDerecho);

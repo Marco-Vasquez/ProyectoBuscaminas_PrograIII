@@ -53,6 +53,11 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     botonPersonalizado->setStyleSheet(Estilos::boton(Estilos::MORADO));
     botonVolver->setMinimumHeight(50);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
+    // ancho fijo + centrado: los botones no se estiran al agrandar la ventana
+    for (QPushButton *b : {botonFacil, botonMedio, botonDificil, botonPersonalizado, botonVolver}) {
+        b->setMinimumWidth(620);
+        b->setMaximumWidth(620);
+    }
 
     connect(botonFacil, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(8, 8, 10); });
     connect(botonMedio, &QPushButton::clicked, this, [this]() { emit dificultadSeleccionada(16, 16, 40); });
@@ -63,12 +68,12 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     layoutMenu->addWidget(etiquetaTitulo);
     layoutMenu->addWidget(etiquetaSubtitulo);
     layoutMenu->addSpacing(10);
-    layoutMenu->addWidget(botonFacil);
-    layoutMenu->addWidget(botonMedio);
-    layoutMenu->addWidget(botonDificil);
-    layoutMenu->addWidget(botonPersonalizado);
+    layoutMenu->addWidget(botonFacil, 0, Qt::AlignHCenter);
+    layoutMenu->addWidget(botonMedio, 0, Qt::AlignHCenter);
+    layoutMenu->addWidget(botonDificil, 0, Qt::AlignHCenter);
+    layoutMenu->addWidget(botonPersonalizado, 0, Qt::AlignHCenter);
     layoutMenu->addStretch();
-    layoutMenu->addWidget(botonVolver);
+    layoutMenu->addWidget(botonVolver, 0, Qt::AlignHCenter);
 
     // --- Página 2: configuración personalizada ---
     QWidget *paginaPersonalizado = new QWidget(panelDificultad);
@@ -111,7 +116,7 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     connect(campoColumnas, QOverload<int>::of(&QComboBox::currentIndexChanged), paginaPersonalizado, actualizarOpcionesMinas);
 
     for (QComboBox *campo : {campoFilas, campoColumnas, campoMinas}) {
-        campo->setMinimumHeight(44);
+        campo->setMinimumHeight(52);
         campo->setStyleSheet(Estilos::combo());
     }
 
@@ -120,14 +125,24 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     layoutCamposPersonalizado->addWidget(campoFilas);
     layoutCamposPersonalizado->addWidget(campoColumnas);
     layoutCamposPersonalizado->addWidget(campoMinas);
+    // contenedor con ancho máximo: la fila de combos no se estira
+    // cuando la ventana se agranda, queda centrada
+    QWidget *contenedorCampos = new QWidget(paginaPersonalizado);
+    contenedorCampos->setMinimumWidth(620);
+    contenedorCampos->setMaximumWidth(620);
+    contenedorCampos->setLayout(layoutCamposPersonalizado);
 
     QPushButton *botonJugarPersonalizado = new QPushButton("JUGAR PERSONALIZADO", paginaPersonalizado);
     botonJugarPersonalizado->setMinimumHeight(55);
     botonJugarPersonalizado->setStyleSheet(Estilos::boton(Estilos::MORADO));
+    botonJugarPersonalizado->setMinimumWidth(620);
+    botonJugarPersonalizado->setMaximumWidth(620);
 
     QPushButton *botonVolverPersonalizado = new QPushButton("← VOLVER", paginaPersonalizado);
     botonVolverPersonalizado->setMinimumHeight(50);
     botonVolverPersonalizado->setStyleSheet(Estilos::botonSecundario());
+    botonVolverPersonalizado->setMinimumWidth(620);
+    botonVolverPersonalizado->setMaximumWidth(620);
 
     connect(botonJugarPersonalizado, &QPushButton::clicked, this, [this, campoFilas, campoColumnas, campoMinas]() {
         int filas = campoFilas->currentData().toInt();
@@ -141,10 +156,10 @@ SeleccionarDificultad::SeleccionarDificultad(QWidget *parent) : QWidget(parent)
     layoutPersonalizado->addWidget(etiquetaPersonalizado);
     layoutPersonalizado->addWidget(etiquetaAyuda);
     layoutPersonalizado->addSpacing(10);
-    layoutPersonalizado->addLayout(layoutCamposPersonalizado);
-    layoutPersonalizado->addWidget(botonJugarPersonalizado);
+    layoutPersonalizado->addWidget(contenedorCampos, 0, Qt::AlignHCenter);
+    layoutPersonalizado->addWidget(botonJugarPersonalizado, 0, Qt::AlignHCenter);
     layoutPersonalizado->addStretch();
-    layoutPersonalizado->addWidget(botonVolverPersonalizado);
+    layoutPersonalizado->addWidget(botonVolverPersonalizado, 0, Qt::AlignHCenter);
 
     panelDificultad->addWidget(paginaMenu);
     panelDificultad->addWidget(paginaPersonalizado);

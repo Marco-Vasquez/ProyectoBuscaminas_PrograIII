@@ -26,7 +26,6 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     layoutPrincipal->setContentsMargins(60, 40, 60, 40);
     layoutPrincipal->setSpacing(12);
 
-    // saludo grande al entrar
     QLabel *etiquetaSaludo = new QLabel("¡Bienvenido!", this);
     etiquetaSaludo->setStyleSheet(Estilos::titulo(30));
     etiquetaSaludo->setAlignment(Qt::AlignCenter);
@@ -35,10 +34,10 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     etiquetaSubtitulo->setStyleSheet(Estilos::textoSuave(13));
     etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
 
-    // tarjeta con el formulario
     QFrame *tarjeta = new QFrame(this);
     tarjeta->setStyleSheet(Estilos::tarjeta());
-    tarjeta->setMaximumWidth(460); // no se estira en pantallas anchas
+    tarjeta->setMinimumWidth(520);
+    tarjeta->setMaximumWidth(520);
     QVBoxLayout *layoutTarjeta = new QVBoxLayout(tarjeta);
     layoutTarjeta->setContentsMargins(24, 24, 24, 24);
     layoutTarjeta->setSpacing(12);
@@ -49,7 +48,7 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     campoContrasena->setPlaceholderText("Contraseña");
     campoContrasena->setEchoMode(QLineEdit::Password);
     for (QLineEdit *campo : {campoUsuario, campoContrasena}) {
-        campo->setMinimumHeight(44);
+        campo->setMinimumHeight(52);
         campo->setStyleSheet(Estilos::campoTexto());
     }
 
@@ -76,6 +75,8 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
 
     QPushButton *botonSalir = new QPushButton("SALIR", this);
     botonSalir->setMinimumHeight(50);
+    botonSalir->setMinimumWidth(520);
+    botonSalir->setMaximumWidth(520);
     botonSalir->setStyleSheet(Estilos::boton(Estilos::ROJO));
 
     connect(botonMostrarContrasena, &QPushButton::toggled, this, [this, botonMostrarContrasena](bool marcado) {
@@ -120,7 +121,7 @@ VentanaLogin::VentanaLogin(QWidget *parent) : QWidget(parent)
     layoutPrincipal->addSpacing(16);
     layoutPrincipal->addWidget(tarjeta, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
-    layoutPrincipal->addWidget(botonSalir);
+    layoutPrincipal->addWidget(botonSalir, 0, Qt::AlignHCenter);
     layoutPrincipal->addSpacing(8);
 }
 

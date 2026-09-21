@@ -3,14 +3,13 @@
 #include <QString>
 #include <QColor>
 
-// Tema visual compartido por todas las pantallas (oscuro, moderno).
 namespace Estilos {
 
-inline const QString FONDO = "#1e272e";         // fondo general de pantallas
-inline const QString TARJETA = "#2c3e50";       // tarjetas y paneles
-inline const QString TARJETA_CLARA = "#34495e"; // tarjetas destacadas (récords)
-inline const QString TEXTO = "#ecf0f1";         // texto principal
-inline const QString TEXTO_SUAVE = "#95a5a6";   // texto secundario
+inline const QString FONDO = "#1e272e";
+inline const QString TARJETA = "#2c3e50";
+inline const QString TARJETA_CLARA = "#34495e";
+inline const QString TEXTO = "#ecf0f1";
+inline const QString TEXTO_SUAVE = "#95a5a6";
 inline const QString VERDE = "#2ecc71";
 inline const QString AZUL = "#3498db";
 inline const QString ROJO = "#e74c3c";
@@ -31,13 +30,11 @@ inline QString oscurecer(const QString &hex, int factor = 82)
     return c.darker(factor).name();
 }
 
-// fondo de una pantalla completa
 inline QString fondoPantalla()
 {
     return QString("background-color: %1;").arg(FONDO);
 }
 
-// botón principal con hover/pressed/disabled
 inline QString boton(const QString &color, int alto = 50)
 {
     return QString(
@@ -49,30 +46,26 @@ inline QString boton(const QString &color, int alto = 50)
         .arg(color, aclarar(color), oscurecer(color));
 }
 
-// botón secundario (volver, etc.)
 inline QString botonSecundario(int alto = 50)
 {
     return boton(GRIS, alto);
 }
 
-// campo de texto (QLineEdit)
 inline QString campoTexto()
 {
     return QString(
                "QLineEdit { background-color: %1; color: %2; border: 1px solid #3d4a55;"
-               " border-radius: 8px; padding: 9px 12px; font-size: 13px;"
+               " border-radius: 8px; padding: 12px 14px; font-size: 15px;"
                " selection-background-color: %3; }"
                "QLineEdit:focus { border: 1px solid %3; }")
         .arg(FONDO, TEXTO, AZUL);
 }
 
-// etiqueta de título grande
 inline QString titulo(int tamano = 22)
 {
     return QString("color: %1; font-weight: bold; font-size: %2px; background: transparent;").arg(TEXTO).arg(tamano);
 }
 
-// etiqueta de texto normal
 inline QString texto(int tamano = 12)
 {
     return QString("color: %1; font-size: %2px; background: transparent;").arg(TEXTO).arg(tamano);
@@ -83,25 +76,22 @@ inline QString textoSuave(int tamano = 11)
     return QString("color: %1; font-size: %2px; background: transparent;").arg(TEXTO_SUAVE).arg(tamano);
 }
 
-// tarjeta contenedora
 inline QString tarjeta()
 {
     return QString("background-color: %1; border-radius: 14px;").arg(TARJETA);
 }
 
-// combo box (QComboBox)
 inline QString combo()
 {
     return QString(
                "QComboBox { background-color: %1; color: %2; border: 2px solid #3d4a55;"
-               " border-radius: 8px; padding: 8px; font-size: 13px; }"
+               " border-radius: 8px; padding: 10px; font-size: 14px; }"
                "QComboBox::drop-down { border: none; width: 24px; }"
                "QComboBox QAbstractItemView { background-color: %1; color: %2;"
                " selection-background-color: %3; selection-color: white; }")
         .arg(FONDO, TEXTO, AZUL);
 }
 
-// slider (QSlider)
 inline QString slider()
 {
     return QString(
@@ -112,5 +102,5 @@ inline QString slider()
         .arg(AZUL, aclarar(AZUL));
 }
 
-} // namespace Estilos
+}
 #endif // ESTILOS_H

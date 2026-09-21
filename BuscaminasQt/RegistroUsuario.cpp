@@ -33,7 +33,8 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
 
     QFrame *tarjeta = new QFrame(this);
     tarjeta->setStyleSheet(Estilos::tarjeta());
-    tarjeta->setMaximumWidth(460); // no se estira en pantallas anchas
+    tarjeta->setMinimumWidth(520); // ancho cómodo, igual que el botón VOLVER
+    tarjeta->setMaximumWidth(520); // no se estira en pantallas anchas
     QVBoxLayout *layoutTarjeta = new QVBoxLayout(tarjeta);
     layoutTarjeta->setContentsMargins(24, 24, 24, 24);
     layoutTarjeta->setSpacing(12);
@@ -44,7 +45,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
     campoContrasena->setPlaceholderText("Contraseña");
     campoContrasena->setEchoMode(QLineEdit::Password);
     for (QLineEdit *campo : {campoUsuario, campoContrasena}) {
-        campo->setMinimumHeight(44);
+        campo->setMinimumHeight(52);
         campo->setStyleSheet(Estilos::campoTexto());
     }
 
@@ -66,6 +67,8 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
 
     QPushButton *botonVolver = new QPushButton("← VOLVER", this);
     botonVolver->setMinimumHeight(50);
+    botonVolver->setMinimumWidth(520); // mismo ancho que la tarjeta para alinear
+    botonVolver->setMaximumWidth(520);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
 
     connect(botonMostrarContrasena, &QPushButton::toggled, this, [campoContrasena, botonMostrarContrasena](bool marcado) {
@@ -126,7 +129,7 @@ RegistroUsuario::RegistroUsuario(QWidget *parent) : QWidget(parent)
     layoutPrincipal->addSpacing(16);
     layoutPrincipal->addWidget(tarjeta, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
-    layoutPrincipal->addWidget(botonVolver);
+    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
     layoutPrincipal->addSpacing(8);
 }
 RegistroUsuario::~RegistroUsuario() {}

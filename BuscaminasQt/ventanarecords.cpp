@@ -33,22 +33,19 @@ VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
     etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
     layoutPrincipal->addWidget(etiquetaSubtitulo);
 
-    // filtro por dificultad (TODOS por defecto)
     filtroDificultad = new QComboBox(this);
     filtroDificultad->addItem("TODOS");
     filtroDificultad->addItem("FÁCIL");
     filtroDificultad->addItem("MEDIO");
     filtroDificultad->addItem("DIFÍCIL");
     filtroDificultad->addItem("PERSONALIZADO");
-    filtroDificultad->setMinimumHeight(40);
+    filtroDificultad->setMinimumHeight(48);
     filtroDificultad->setMaximumWidth(280);
     filtroDificultad->setStyleSheet(Estilos::combo());
     connect(filtroDificultad, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
             [this](int) { actualizarRecords(); });
     layoutPrincipal->addWidget(filtroDificultad, 0, Qt::AlignHCenter);
 
-    // área con scroll: con muchos puntajes las tarjetas se desplazan
-    // y el botón VOLVER siempre queda visible
     QScrollArea *areaDesplazamiento = new QScrollArea(this);
     areaDesplazamiento->setWidgetResizable(true);
     areaDesplazamiento->setFrameShape(QFrame::NoFrame);
@@ -63,12 +60,14 @@ VentanaRecords::VentanaRecords(QWidget *parent) : QWidget(parent)
 
     QPushButton *botonVolver=new QPushButton("<- VOLVER",this);
     botonVolver->setMinimumHeight(50);
+    botonVolver->setMinimumWidth(620);
+    botonVolver->setMaximumWidth(620);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonVolver,&QPushButton::clicked,this,[this](){
         emit volverSolicitado();
     });
 
-    layoutPrincipal->addWidget(botonVolver);
+    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
 
     actualizarRecords();
 }
@@ -96,11 +95,10 @@ void VentanaRecords::actualizarRecords(){
         etiquetaVacio->setStyleSheet(Estilos::textoSuave(13));
         etiquetaVacio->setAlignment(Qt::AlignCenter);
         layoutRegistros->addWidget(etiquetaVacio);
-        layoutRegistros->addStretch();
+        layoutRegistros->addStretch(1);
         return;
     }
 
-    // copia local para ordenar por puntaje (mayor primero) sin tocar el gestor
     std::vector<RegistroPuntaje> registros;
     registros.reserve(cantidad);
     for(int i=0;i<cantidad;i++){
@@ -111,7 +109,6 @@ void VentanaRecords::actualizarRecords(){
                   return a.puntaje > b.puntaje;
               });
 
-    // filtro por dificultad: FÁCIL=8x8, MEDIO=16x16, DIFÍCIL=16x30, el resto es personalizado
     QString filtro = filtroDificultad ? filtroDificultad->currentText() : "TODOS";
     int mostrados = 0;
 
@@ -128,14 +125,14 @@ void VentanaRecords::actualizarRecords(){
         }
         mostrados++;
 
-        // tarjeta por partida: contenedor con fondo y bordes redondeados
         QFrame *tarjeta=new QFrame(contenedorRegistros);
         tarjeta->setStyleSheet("background-color: #34495e; border-radius: 10px;");
+        tarjeta->setMinimumWidth(600);
+        tarjeta->setMaximumWidth(600);
         QHBoxLayout *layoutTarjeta=new QHBoxLayout(tarjeta);
         layoutTarjeta->setContentsMargins(12, 8, 12, 8);
         layoutTarjeta->setSpacing(12);
 
-        // medalla real (PNG) según el registro
         QString nombreMedalla=QString::fromStdString(registro.medalla);
         if(nombreMedalla.isEmpty()){
             nombreMedalla="Ninguna";
@@ -158,7 +155,6 @@ void VentanaRecords::actualizarRecords(){
         layoutMedallaNombre->addStretch();
         layoutTarjeta->addLayout(layoutMedallaNombre);
 
-        // nombre + dificultad a la izquierda, tiempo a la derecha
         QVBoxLayout *layoutDatos=new QVBoxLayout();
         layoutDatos->setSpacing(2);
         QLabel *etiquetaNombre=new QLabel(QString::fromStdString(registro.nombreJugador), tarjeta);
@@ -175,7 +171,6 @@ void VentanaRecords::actualizarRecords(){
 
         layoutTarjeta->addStretch();
 
-        // puntaje (grande) y tiempo (chico) a la derecha
         QVBoxLayout *layoutPuntajeTiempo=new QVBoxLayout();
         layoutPuntajeTiempo->setSpacing(2);
         QLabel *etiquetaPuntaje=new QLabel(QString("%1 pts").arg(registro.puntaje), tarjeta);
@@ -192,7 +187,7 @@ void VentanaRecords::actualizarRecords(){
         layoutPuntajeTiempo->addWidget(etiquetaTiempo);
         layoutTarjeta->addLayout(layoutPuntajeTiempo);
 
-        layoutRegistros->addWidget(tarjeta);
+        layoutRegistros->addWidget(tarjeta, 0, Qt::AlignHCenter);
     }
 
     if(mostrados == 0){
@@ -201,5 +196,5 @@ void VentanaRecords::actualizarRecords(){
         etiquetaVacio->setAlignment(Qt::AlignCenter);
         layoutRegistros->addWidget(etiquetaVacio);
     }
-    layoutRegistros->addStretch();
+    layoutRegistros->addStretch(1);
 }

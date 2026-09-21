@@ -22,10 +22,9 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
     etiquetaSubtitulo->setStyleSheet(Estilos::textoSuave(13));
     etiquetaSubtitulo->setAlignment(Qt::AlignCenter);
 
-    // tarjeta con los controles de audio
     QFrame* tarjeta=new QFrame(this);
     tarjeta->setStyleSheet(Estilos::tarjeta());
-    tarjeta->setMaximumWidth(560); // no se estira en pantallas anchas
+    tarjeta->setMaximumWidth(560);
     QVBoxLayout* layoutTarjeta=new QVBoxLayout(tarjeta);
     layoutTarjeta->setContentsMargins(24,20,24,20);
     layoutTarjeta->setSpacing(8);
@@ -52,6 +51,8 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
 
     QPushButton *botonVolver=new QPushButton("<- VOLVER",this);
     botonVolver->setMinimumHeight(50);
+    botonVolver->setMinimumWidth(600);
+    botonVolver->setMaximumWidth(600);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(sliderMusica,&QSlider::valueChanged,this,[this](int valor){
         this->gestorAudio->setVolumenMusica(valor);
@@ -65,7 +66,6 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
         volverSolicitado();
     });
 
-    // fila: etiqueta + slider + porcentaje
     QHBoxLayout* filaMusica=new QHBoxLayout();
     filaMusica->addWidget(etiquetaMusica);
     filaMusica->addWidget(sliderMusica, 1);
@@ -85,7 +85,7 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
     layoutPrincipal->addSpacing(16);
     layoutPrincipal->addWidget(tarjeta, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
-    layoutPrincipal->addWidget(botonVolver);
+    layoutPrincipal->addWidget(botonVolver, 0, Qt::AlignHCenter);
     layoutPrincipal->addSpacing(8);
 }
 VentanaOpciones::~VentanaOpciones() {}

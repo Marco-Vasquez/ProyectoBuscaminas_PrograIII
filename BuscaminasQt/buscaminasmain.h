@@ -2,6 +2,10 @@
 #define BUSCAMINASMAIN_H
 #include <QMainWindow>
 class QStackedWidget;
+class QGraphicsScene;
+class QGraphicsView;
+class QGraphicsProxyWidget;
+class QResizeEvent;
 class SeleccionarDificultad;
 class RegistroUsuario;
 class VentanaJuego;
@@ -19,8 +23,14 @@ class BuscaminasMain : public QMainWindow
 public:
     explicit BuscaminasMain(QWidget *parent = nullptr);
     ~BuscaminasMain() override;
+protected:
+    // escala toda la interfaz para que crezca junto con la ventana
+    void resizeEvent(QResizeEvent *evento) override;
 private:
     QStackedWidget *panelPrincipal = nullptr;
+    QGraphicsScene *escenaUI = nullptr;
+    QGraphicsView *vistaUI = nullptr;
+    QGraphicsProxyWidget *proxyUI = nullptr;
     QWidget *pantallaMenu = nullptr;
     VentanaLogin *ventanaLogin = nullptr;
     SeleccionarDificultad *ventanaSeleccionDificultad = nullptr;

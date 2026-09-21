@@ -21,25 +21,51 @@
 #include <QWidget>
 #include <QStackedWidget>
 #include <QFont>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QGraphicsProxyWidget>
+#include <QResizeEvent>
+#include <QPainter>
+#include <QColor>
+#include <QTimer>
 
 BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 {
     setWindowTitle("Buscaminas - Menú Principal");
-    // Antes: setFixedSize(720, 580) — bloqueaba maximizar/redimensionar
-    // por completo. Las pantallas ya no se estiran gracias al
-    // setMaximumWidth() + centrado de cada tarjeta (ver VentanaLogin,
-    // RegistroUsuario, etc.), así que alcanza con un tamaño inicial.
+    // La interfaz se dibuja en una base fija de 720x580 y se escala con
+    // fitInView para que TODO crezca proporcionalmente al agrandar la
+    // ventana (botones, textos, tarjetas y tablero).
     resize(720, 580);
+    setMinimumSize(480, 380);
 
-    panelPrincipal = new QStackedWidget(this);
-    setCentralWidget(panelPrincipal);
+    // top-level (sin padre): QGraphicsScene::addWidget solo embebe bien
+    // widgets sin padre; con padre quedaba dibujado detrás del view y la
+    // ventana se veía completamente en blanco
+    panelPrincipal = new QStackedWidget;
+    // el fondo de las páginas (stylesheet) no se pinta a través del proxy;
+    // se le da el fondo FONDO al stacked widget con paleta, que sí se pinta
+    panelPrincipal->setAutoFillBackground(true);
+    QPalette paletaPanel = panelPrincipal->palette();
+    paletaPanel.setColor(QPalette::Window, QColor(Estilos::FONDO));
+    panelPrincipal->setPalette(paletaPanel);
+    escenaUI = new QGraphicsScene(this);
+    proxyUI = escenaUI->addWidget(panelPrincipal);
+    proxyUI->setGeometry(QRectF(0, 0, 720, 580)); // tamaño base fijo de la interfaz
+    vistaUI = new QGraphicsView(escenaUI, this);
+    vistaUI->setFrameShape(QFrame::NoFrame);
+    vistaUI->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    vistaUI->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    vistaUI->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    vistaUI->setBackgroundBrush(QColor(Estilos::FONDO));
+    setCentralWidget(vistaUI);
+    panelPrincipal->setFixedSize(720, 580);
 
     // Menú principal
     pantallaMenu = new QWidget(panelPrincipal);
     pantallaMenu->setStyleSheet(Estilos::fondoPantalla());
     QVBoxLayout *layoutPrincipal = new QVBoxLayout(pantallaMenu);
-    layoutPrincipal->setContentsMargins(50, 30, 50, 30);
-    layoutPrincipal->setSpacing(12);
+    layoutPrincipal->setContentsMargins(50, 20, 50, 20);
+    layoutPrincipal->setSpacing(10);
     QLabel *etiquetaTitulo = new QLabel("BUSCAMINAS", pantallaMenu);
     etiquetaTitulo->setStyleSheet(Estilos::titulo(30));
     etiquetaTitulo->setAlignment(Qt::AlignCenter);
@@ -51,6 +77,9 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     // medallas del jugador: tarjetas con el PNG real de cada medalla
     QHBoxLayout *layoutMedallas = new QHBoxLayout();
     layoutMedallas->setSpacing(10);
+    QWidget *contenedorMedallas = new QWidget(pantallaMenu);
+    contenedorMedallas->setMinimumWidth(620);
+    contenedorMedallas->setMaximumWidth(620);
     etiquetaIconoBronce = new QLabel(pantallaMenu);
     etiquetaIconoPlata = new QLabel(pantallaMenu);
     etiquetaIconoOro = new QLabel(pantallaMenu);
@@ -82,32 +111,38 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         layoutMedalla->addWidget(m.nombre);
         layoutMedallas->addWidget(tarjetaMedalla);
     }
+    contenedorMedallas->setLayout(layoutMedallas);
     QPushButton *botonJugar = new QPushButton("JUGAR", pantallaMenu);
     QPushButton *botonRecords = new QPushButton("RÉCORDS", pantallaMenu);
     QPushButton *botonOpciones = new QPushButton("OPCIONES", pantallaMenu);
     QPushButton *botonAyuda=new QPushButton("AYUDA",pantallaMenu);
     QPushButton *botonCerrarSesion = new QPushButton("CERRAR SESIÓN", pantallaMenu);
     QPushButton *botonSalir = new QPushButton("SALIR", pantallaMenu);
-    botonJugar->setMinimumHeight(60);
+    botonJugar->setMinimumHeight(55);
     botonJugar->setStyleSheet(Estilos::boton(Estilos::VERDE));
     botonRecords->setMinimumHeight(50);
     botonRecords->setStyleSheet(Estilos::boton(Estilos::MORADO));
     botonOpciones->setMinimumHeight(50);
     botonOpciones->setStyleSheet(Estilos::boton(Estilos::TURQUESA));
-    botonAyuda->setMinimumHeight(50);
+    botonAyuda->setMinimumHeight(40); // más chico para que el menú entre en 580 px
     botonAyuda->setStyleSheet(Estilos::boton(Estilos::AZUL));
     botonCerrarSesion->setMinimumHeight(50);
     botonCerrarSesion->setStyleSheet(Estilos::boton(Estilos::NARANJA));
     botonSalir->setMinimumHeight(50);
     botonSalir->setStyleSheet(Estilos::boton(Estilos::ROJO));
+    for (QPushButton *b : {botonJugar, botonRecords, botonOpciones, botonAyuda, botonCerrarSesion, botonSalir}) {
+        b->setMinimumWidth(620);
+        b->setMaximumWidth(620);
+    }
     layoutPrincipal->addWidget(etiquetaTitulo);
-    layoutPrincipal->addLayout(layoutMedallas);
+    layoutPrincipal->addWidget(contenedorMedallas, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
-    layoutPrincipal->addWidget(botonJugar);
-    layoutPrincipal->addWidget(botonRecords);
-    layoutPrincipal->addWidget(botonOpciones);
-    layoutPrincipal->addWidget(botonCerrarSesion);
-    layoutPrincipal->addWidget(botonSalir);
+    layoutPrincipal->addWidget(botonJugar, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonRecords, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonOpciones, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonAyuda, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonCerrarSesion, 0, Qt::AlignHCenter);
+    layoutPrincipal->addWidget(botonSalir, 0, Qt::AlignHCenter);
     layoutPrincipal->addStretch();
 
     ventanaLogin = new VentanaLogin(panelPrincipal);
@@ -179,7 +214,6 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     });
     connect(ventanaVictoria, &VentanaVictoria::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
     connect(ventanaVictoria, &VentanaVictoria::siguienteNivelSolicitado, this, [this]() {
-        // los valores quedan guardados en las propiedades dinámicas de ventanaVictoria (ver abajo)
         int filas = ventanaVictoria->property("filasSig").toInt();
         int columnas = ventanaVictoria->property("columnasSig").toInt();
         int minas = ventanaVictoria->property("minasSig").toInt();
@@ -187,14 +221,12 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     });
     connect(ventanaDerrota, &VentanaDerrota::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
     connect(ventanaDerrota, &VentanaDerrota::reintentarSolicitado, this, [this]() {
-        // los valores quedan guardados en las propiedades dinámicas de ventanaDerrota (ver abajo)
         int filas = ventanaDerrota->property("filasReintento").toInt();
         int columnas = ventanaDerrota->property("columnasReintento").toInt();
         int minas = ventanaDerrota->property("minasReintento").toInt();
         abrirPartida(filas, columnas, minas);
     });
     connect(botonCerrarSesion, &QPushButton::clicked, this, [this]() {
-        // Descarta la partida en curso (si la hay) para no arrastrar estado entre cuentas
         if (ventanaJuego) {
             panelPrincipal->removeWidget(ventanaJuego);
             ventanaJuego->deleteLater();
@@ -225,11 +257,9 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 
     connect(ventanaLogin, &VentanaLogin::salirSolicitado, this, &QMainWindow::close);
 
-    // volver regresa al login
     connect(ventanaRegistroUsuario, &RegistroUsuario::volverSolicitado, this, [this]() {
         panelPrincipal->setCurrentWidget(ventanaLogin);
     });
-    // al registrarse correctamente se ingresa directo al juego con esa cuenta
     connect(ventanaRegistroUsuario, &RegistroUsuario::registroCompletado, this, [this](QString nombreUsuario) {
         nombreUsuarioActual = nombreUsuario;
         panelPrincipal->setCurrentWidget(pantallaMenu);
@@ -247,7 +277,6 @@ void BuscaminasMain::actualizarMedallas(){
                      };
     for(auto &m:medallas){
         bool obtenida=gestorMedallas.tieneMedalla(usuario,m.tipo);
-        // PNG real de la medalla; gris (ninguna) si todavía no se ganó
         m.icono->setPixmap(cargarMedallaPixmap(obtenida ? QString(m.tipo) : "Ninguna", 44));
         m.nombre->setStyleSheet(obtenida
                                     ? QString("color: %1; font-weight: bold; font-size: 10px;").arg(colorDeMedalla(m.tipo))
@@ -291,3 +320,20 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
     gestorAudio->iniciarMusicaJuego();
 }
 BuscaminasMain::~BuscaminasMain() {}
+
+void BuscaminasMain::resizeEvent(QResizeEvent *evento)
+{
+    QMainWindow::resizeEvent(evento);
+    // escala la interfaz completa (base 720x580) para que ocupe la ventana
+    // entera manteniendo la proporción (igual que el tablero en la partida).
+    // Se reprograma con singleShot(0) porque en el resizeEvent el viewport
+    // todavía puede tener el tamaño viejo y el ajuste quedaría mal.
+    if (vistaUI) {
+        vistaUI->fitInView(QRectF(0, 0, 720, 580), Qt::KeepAspectRatio);
+        QTimer::singleShot(0, this, [this]() {
+            if (vistaUI) {
+                vistaUI->fitInView(QRectF(0, 0, 720, 580), Qt::KeepAspectRatio);
+            }
+        });
+    }
+}

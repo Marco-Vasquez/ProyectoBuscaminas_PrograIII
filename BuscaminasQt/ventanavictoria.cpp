@@ -35,10 +35,12 @@ VentanaVictoria::VentanaVictoria(QWidget *parent):QWidget(parent) {
     botonSiguienteNivel = new QPushButton("SIGUIENTE NIVEL", this);
     QPushButton *botonVolver = new QPushButton("VOLVER AL MENÚ", this);
     botonSiguienteNivel->setMinimumHeight(50);
-    botonSiguienteNivel->setMaximumWidth(380);
+    botonSiguienteNivel->setMinimumWidth(520);
+    botonSiguienteNivel->setMaximumWidth(520);
     botonSiguienteNivel->setStyleSheet(Estilos::boton(Estilos::VERDE));
     botonVolver->setMinimumHeight(50);
-    botonVolver->setMaximumWidth(380);
+    botonVolver->setMinimumWidth(520);
+    botonVolver->setMaximumWidth(520);
     botonVolver->setStyleSheet(Estilos::botonSecundario());
     connect(botonSiguienteNivel, &QPushButton::clicked, this, [this]() { emit siguienteNivelSolicitado(); });
     connect(botonVolver, &QPushButton::clicked, this, [this]() { emit volverSolicitado(); });
