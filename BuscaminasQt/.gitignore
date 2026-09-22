@@ -89,3 +89,6 @@ CMakeLists.txt.user*
 /usuarios.txt
 /puntajes.txt
 /medallas.txt
+INFORME_CAMBIOS.md
+.opencode/
+opencode.jsonc
