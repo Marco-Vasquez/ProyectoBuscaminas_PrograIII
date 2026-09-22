@@ -86,6 +86,7 @@ void GestorAudio::detenerMusica()
 {
     reproductorMusica->stop();
     musicaActual.clear();
+    musicaPausadaPorMute = false;
 }
 
 void GestorAudio::reproducirMusica(const QString &archivo)
@@ -97,10 +98,14 @@ void GestorAudio::reproducirMusica(const QString &archivo)
     musicaActual = ruta;
     reproductorMusica->setSource(QUrl::fromLocalFile(ruta));
     reproductorMusica->play();
+    musicaPausadaPorMute = false;
 }
 void GestorAudio::setVolumenMusica(int porcentaje){
     salidaAudio->setVolume(porcentaje/100.0f);
-    if (porcentaje > 0) muteado = false;
+    if (porcentaje > 0 && muteado) {
+        muteado = false;
+        emit muteCambiado(false);
+    }
 }
 void GestorAudio::setVolumenEfectos(int porcentaje){
     volumenEfectosActual=porcentaje;
@@ -108,7 +113,10 @@ void GestorAudio::setVolumenEfectos(int porcentaje){
     efectoClic->setVolume(volumen);
     efectoBandera->setVolume(volumen);
     efectoExplosion->setVolume(volumen);
-    if (porcentaje > 0) muteado = false;
+    if (porcentaje > 0 && muteado) {
+        muteado = false;
+        emit muteCambiado(false);
+    }
 }
 int GestorAudio::getVolumenMusica() const{
     return static_cast<int>(salidaAudio->volume()*100);
@@ -127,13 +135,28 @@ void GestorAudio::setMuteado(bool silenciado){
         // guarda los niveles actuales para poder restaurarlos al desmutear
         nivelMusicaPreMute = getVolumenMusica();
         nivelEfectosPreMute = getVolumenEfectos();
+        // silencio instantáneo: pausar la música y cortar los sfx que
+        // estén sonando (si no, se oye la cola ~2s antes de apagarse)
+        musicaPausadaPorMute = (reproductorMusica->playbackState() == QMediaPlayer::PlayingState);
+        if (musicaPausadaPorMute) {
+            reproductorMusica->pause();
+        }
         setVolumenMusica(0);
         setVolumenEfectos(0);
+        efectoClic->stop();
+        efectoBandera->stop();
+        efectoExplosion->stop();
     } else {
         setVolumenMusica(nivelMusicaPreMute);
         setVolumenEfectos(nivelEfectosPreMute);
+        // retoma la música donde quedó (solo si el mute la había pausado)
+        if (musicaPausadaPorMute) {
+            musicaPausadaPorMute = false;
+            reproductorMusica->play();
+        }
     }
     muteado = silenciado;
+    emit muteCambiado(silenciado);
 }
 int GestorAudio::getContadorClics() const { return contadorClics; }
 int GestorAudio::getContadorBanderas() const { return contadorBanderas; }

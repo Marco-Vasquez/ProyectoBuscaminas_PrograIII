@@ -28,6 +28,10 @@
 #include <QPainter>
 #include <QColor>
 #include <QTimer>
+#include <QShortcut>
+#include <QKeySequence>
+#include <QApplication>
+#include <QSettings>
 
 BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
 {
@@ -178,8 +182,18 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         panelPrincipal->setCurrentWidget(ventanaSeleccionDificultad);
     });
     connect(botonRecords, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaRecords); });
-    connect(botonOpciones, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaOpciones); });
-    connect(ventanaOpciones, &VentanaOpciones::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
+    connect(botonOpciones, &QPushButton::clicked, this, [this]() {
+        // refresca los sliders con los niveles reales (si se muteó en
+        // partida mostraban valores viejos y no había forma de desmutear)
+        ventanaOpciones->sincronizarValores();
+        panelPrincipal->setCurrentWidget(ventanaOpciones);
+    });
+    connect(ventanaOpciones, &VentanaOpciones::volverSolicitado, this, [this]() { mostrarMenu(); });
+
+    // cada cambio de mute se recuerda para el usuario actual
+    connect(gestorAudio, &GestorAudio::muteCambiado, this, [this](bool silenciado) {
+        guardarPreferenciaMute(silenciado);
+    });
     connect(panelPrincipal, &QStackedWidget::currentChanged, this, [this](int) {
         QWidget *actual = panelPrincipal->currentWidget();
         if (actual == pantallaMenu) {
@@ -209,16 +223,16 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
         panelPrincipal->setCurrentWidget(ventanaAyuda);
     });
     connect(ventanaAyuda,&VentanaAyuda::volverSolicitado,this,[this](){
-        panelPrincipal->setCurrentWidget(pantallaMenu);
+        mostrarMenu();
     });
-    connect(ventanaVictoria, &VentanaVictoria::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
+    connect(ventanaVictoria, &VentanaVictoria::volverSolicitado, this, [this]() { mostrarMenu(); });
     connect(ventanaVictoria, &VentanaVictoria::siguienteNivelSolicitado, this, [this]() {
         int filas = ventanaVictoria->property("filasSig").toInt();
         int columnas = ventanaVictoria->property("columnasSig").toInt();
         int minas = ventanaVictoria->property("minasSig").toInt();
         abrirPartida(filas, columnas, minas);
     });
-    connect(ventanaDerrota, &VentanaDerrota::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
+    connect(ventanaDerrota, &VentanaDerrota::volverSolicitado, this, [this]() { mostrarMenu(); });
     connect(ventanaDerrota, &VentanaDerrota::reintentarSolicitado, this, [this]() {
         int filas = ventanaDerrota->property("filasReintento").toInt();
         int columnas = ventanaDerrota->property("columnasReintento").toInt();
@@ -228,23 +242,39 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     connect(botonCerrarSesion, &QPushButton::clicked, this, [this]() {
         cerrarPantallaPartida();
         nombreUsuarioActual = "Jugador";
+        aplicarPreferenciaMute(nombreUsuarioActual);
         ventanaLogin->limpiarCampos();
         panelPrincipal->setCurrentWidget(ventanaLogin);
     });
     connect(botonSalir, &QPushButton::clicked, this, &QMainWindow::close);
 
-    connect(ventanaSeleccionDificultad, &SeleccionarDificultad::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
+    connect(ventanaSeleccionDificultad, &SeleccionarDificultad::volverSolicitado, this, [this]() { mostrarMenu(); });
     connect(ventanaSeleccionDificultad, &SeleccionarDificultad::dificultadSeleccionada, this,
             [this](int cantidadFilas, int cantidadColumnas, int cantidadMinas) {
                 abrirPartida(cantidadFilas, cantidadColumnas, cantidadMinas);
             });
 
-    connect(ventanaRecords, &VentanaRecords::volverSolicitado, this, [this]() { panelPrincipal->setCurrentWidget(pantallaMenu); });
+    connect(ventanaRecords, &VentanaRecords::volverSolicitado, this, [this]() { mostrarMenu(); });
+
+    // pantalla completa estilo borderless: Alt+Enter (o Alt+Return) alterna,
+    // Escape sale; también hay un checkbox en Opciones
+    QShortcut *atajoFullscreen1 = new QShortcut(QKeySequence("Alt+Return"), this);
+    QShortcut *atajoFullscreen2 = new QShortcut(QKeySequence("Alt+Enter"), this);
+    connect(atajoFullscreen1, &QShortcut::activated, this, [this]() { setPantallaCompleta(!isFullScreen()); });
+    connect(atajoFullscreen2, &QShortcut::activated, this, [this]() { setPantallaCompleta(!isFullScreen()); });
+    QShortcut *atajoSalirFullscreen = new QShortcut(QKeySequence(Qt::Key_Escape), this);
+    connect(atajoSalirFullscreen, &QShortcut::activated, this, [this]() {
+        // no robar el Escape de un popup abierto (p. ej. un combo)
+        if (isFullScreen() && !QApplication::activePopupWidget()) {
+            setPantallaCompleta(false);
+        }
+    });
 
     //al entrar correctamente se guarda el usuario y pasa al menú
     connect(ventanaLogin, &VentanaLogin::loginExitoso, this, [this](QString nombreUsuario) {
         nombreUsuarioActual = nombreUsuario;
-        panelPrincipal->setCurrentWidget(pantallaMenu);
+        aplicarPreferenciaMute(nombreUsuarioActual);
+        mostrarMenu();
     });
     connect(ventanaLogin, &VentanaLogin::registroSolicitado, this, [this]() {
         panelPrincipal->setCurrentWidget(ventanaRegistroUsuario);
@@ -257,7 +287,8 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     });
     connect(ventanaRegistroUsuario, &RegistroUsuario::registroCompletado, this, [this](QString nombreUsuario) {
         nombreUsuarioActual = nombreUsuario;
-        panelPrincipal->setCurrentWidget(pantallaMenu);
+        aplicarPreferenciaMute(nombreUsuarioActual);
+        mostrarMenu();
     });
 }
 void BuscaminasMain::actualizarMedallas(){
@@ -281,13 +312,15 @@ void BuscaminasMain::actualizarMedallas(){
 void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
 {
     cerrarPantallaPartida();
+    // el mute vive dentro de la partida: al entrar se restaura la
+    // preferencia guardada de la cuenta (el menú siempre entra sin mute)
+    aplicarPreferenciaMute(nombreUsuarioActual);
     ventanaJuego = new VentanaJuego(filas, columnas, minas, contenedorPrincipal);
     ventanaJuego->setNombreJugador(nombreUsuarioActual);
     ventanaJuego->setGestorAudio(gestorAudio);
 
     connect(ventanaJuego, &VentanaJuego::volverSolicitado, this, [this]() {
-        cerrarPantallaPartida();
-        panelPrincipal->setCurrentWidget(pantallaMenu);
+        mostrarMenu();
     });
     connect(ventanaJuego, &VentanaJuego::victoriaObtenida, this,
             [this](int segundos, int banderas, QString textoMedalla, bool haySiguiente, int filasSig, int columnasSig, int minasSig) {
@@ -295,6 +328,9 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
                 ventanaVictoria->setProperty("columnasSig", columnasSig);
                 ventanaVictoria->setProperty("minasSig", minasSig);
                 ventanaVictoria->mostrarResultado(segundos, banderas, textoMedalla, haySiguiente);
+                // explícito: currentChanged no siempre dispara (p. ej. dos
+                // victorias seguidas) y la música del juego quedaría sonando
+                gestorAudio->detenerMusica();
                 cerrarPantallaPartida();
                 panelPrincipal->setCurrentWidget(ventanaVictoria);
             });
@@ -306,6 +342,9 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
                 ventanaDerrota->setProperty("columnasReintento", columnas);
                 ventanaDerrota->setProperty("minasReintento", minas);
                 ventanaDerrota->mostrarResultado(segundos, banderas);
+                // explícito: en derrotas consecutivas el panel ya muestra
+                // derrota, currentChanged no dispara y la música seguía
+                gestorAudio->detenerMusica();
                 cerrarPantallaPartida();
                 panelPrincipal->setCurrentWidget(ventanaDerrota);
             });
@@ -327,6 +366,8 @@ void BuscaminasMain::cerrarPantallaPartida()
         ventanaJuego->deleteLater();
         ventanaJuego = nullptr;
     }
+    // NOTA: el mute NO se reinicia aquí a propósito: la preferencia se
+    // recuerda entre partidas y por usuario (ver guardar/aplicarPreferenciaMute)
     // la vista de menús estuvo oculta durante la partida; al volver a
     // mostrarla se reajusta para que quede centrada y a escala correcta
     QTimer::singleShot(0, this, [this]() {
@@ -334,6 +375,62 @@ void BuscaminasMain::cerrarPantallaPartida()
             vistaUI->fitInView(QRectF(0, 0, 720, 580), Qt::KeepAspectRatio);
         }
     });
+}
+
+void BuscaminasMain::mostrarMenu()
+{
+    cerrarPantallaPartida();
+    // el menú siempre suena: se quita el mute sin borrar la preferencia
+    // (al abrir la próxima partida se vuelve a aplicar)
+    desmutearSinGuardar();
+    actualizarMedallas();
+    etiquetaSesion->setText(QString("¡Hola, %1!").arg(nombreUsuarioActual));
+    setWindowTitle("Buscaminas - Menú Principal");
+    // la música del menú se retoma aquí y no solo en currentChanged:
+    // al volver de una partida ese signal no dispara (la partida ya no
+    // vive dentro de panelPrincipal) y quedaba sonando la música del juego
+    gestorAudio->iniciarMusicaMenu();
+    panelPrincipal->setCurrentWidget(pantallaMenu);
+}
+
+void BuscaminasMain::setPantallaCompleta(bool completa)
+{
+    if (completa == isFullScreen()) {
+        return;
+    }
+    if (completa) {
+        showFullScreen();
+    } else {
+        showNormal();
+    }
+}
+
+void BuscaminasMain::guardarPreferenciaMute(bool silenciado)
+{
+    QSettings ajustes(QCoreApplication::applicationDirPath() + "/BuscaminasQt.ini",
+                      QSettings::IniFormat);
+    ajustes.setValue(QString("mute/%1").arg(nombreUsuarioActual), silenciado);
+}
+
+void BuscaminasMain::aplicarPreferenciaMute(const QString &usuario)
+{
+    QSettings ajustes(QCoreApplication::applicationDirPath() + "/BuscaminasQt.ini",
+                      QSettings::IniFormat);
+    bool silenciado = ajustes.value(QString("mute/%1").arg(usuario), false).toBool();
+    if (gestorAudio) {
+        gestorAudio->setMuteado(silenciado);
+    }
+}
+
+void BuscaminasMain::desmutearSinGuardar()
+{
+    if (gestorAudio) {
+        // blockSignals para que setMuteado no emita muteCambiado y no
+        // se sobrescriba la preferencia guardada del usuario
+        gestorAudio->blockSignals(true);
+        gestorAudio->setMuteado(false);
+        gestorAudio->blockSignals(false);
+    }
 }
 BuscaminasMain::~BuscaminasMain() {}
 

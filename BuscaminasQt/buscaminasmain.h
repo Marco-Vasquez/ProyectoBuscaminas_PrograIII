@@ -23,6 +23,7 @@ class BuscaminasMain : public QMainWindow
 public:
     explicit BuscaminasMain(QWidget *parent = nullptr);
     ~BuscaminasMain() override;
+    void setPantallaCompleta(bool completa);
 protected:
     // escala toda la interfaz para que crezca junto con la ventana
     void resizeEvent(QResizeEvent *evento) override;
@@ -53,6 +54,17 @@ private:
     VentanaOpciones* ventanaOpciones=nullptr;
     void abrirPartida(int filas,int columnas,int minas);
     void cerrarPantallaPartida();
+    // vuelve al menú refrescando medallas/sesión y retomando la música
+    // del menú sin depender de currentChanged (la partida ya no vive
+    // dentro de panelPrincipal y ese signal no siempre dispara)
+    void mostrarMenu();
+    // preferencia de mute por usuario (BuscaminasQt.ini junto al exe):
+    // se recuerda entre partidas y cuentas
+    void guardarPreferenciaMute(bool silenciado);
+    void aplicarPreferenciaMute(const QString &usuario);
+    // quita el mute SIN tocar la preferencia guardada: el menú (y las
+    // pantallas sin partida) siempre suenan; el mute vive en la partida
+    void desmutearSinGuardar();
     void actualizarMedallas();
     QString nombreUsuarioActual="Jugador";
     QLabel* etiquetaIconoValiente=nullptr;

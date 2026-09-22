@@ -89,3 +89,16 @@ VentanaOpciones::VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent): QWid
     layoutPrincipal->addSpacing(8);
 }
 VentanaOpciones::~VentanaOpciones() {}
+
+void VentanaOpciones::sincronizarValores()
+{
+    if (!gestorAudio) return;
+    sliderMusica->blockSignals(true);
+    sliderEfectos->blockSignals(true);
+    sliderMusica->setValue(gestorAudio->getVolumenMusica());
+    sliderEfectos->setValue(gestorAudio->getVolumenEfectos());
+    etiquetaValorMusica->setText(QString("%1%").arg(sliderMusica->value()));
+    etiquetaValorEfectos->setText(QString("%1%").arg(sliderEfectos->value()));
+    sliderMusica->blockSignals(false);
+    sliderEfectos->blockSignals(false);
+}
