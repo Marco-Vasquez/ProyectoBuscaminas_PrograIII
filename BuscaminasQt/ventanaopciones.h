@@ -10,8 +10,7 @@ class VentanaOpciones:public QWidget
 public:
     explicit VentanaOpciones(GestorAudio* gestorAudio,QWidget* parent=nullptr);
     ~VentanaOpciones() override;
-    // refresca sliders con los niveles reales (el mute de partida los
-    // dejaba desactualizados); no dispara los signals de cambio
+
     void sincronizarValores();
 signals:
     void volverSolicitado();

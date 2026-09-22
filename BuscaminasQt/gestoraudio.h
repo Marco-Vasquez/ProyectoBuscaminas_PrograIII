@@ -32,8 +32,7 @@ public:
     int getContadorBanderas() const;
     int getContadorExplosiones() const;
 signals:
-    // se emite cada vez que el estado de mute cambia (botón de partida
-    // o sliders): sirve para recordar la preferencia por usuario
+
     void muteCambiado(bool silenciado);
 private:
     QSoundEffect *efectoClic;
@@ -50,8 +49,7 @@ private:
     bool muteado = false;
     int nivelMusicaPreMute = 50;
     int nivelEfectosPreMute = 60;
-    // true si al mutear la música estaba sonando y se pausó: al
-    // desmutear se retoma donde quedó en vez de reiniciar
+
     bool musicaPausadaPorMute = false;
 };
 

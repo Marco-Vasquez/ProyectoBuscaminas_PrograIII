@@ -184,7 +184,6 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     connect(botonRecords, &QPushButton::clicked, this, [this]() { panelPrincipal->setCurrentWidget(ventanaRecords); });
     connect(botonOpciones, &QPushButton::clicked, this, [this]() {
         // refresca los sliders con los niveles reales (si se muteó en
-        // partida mostraban valores viejos y no había forma de desmutear)
         ventanaOpciones->sincronizarValores();
         panelPrincipal->setCurrentWidget(ventanaOpciones);
     });
@@ -257,7 +256,6 @@ BuscaminasMain::BuscaminasMain(QWidget *parent) : QMainWindow(parent)
     connect(ventanaRecords, &VentanaRecords::volverSolicitado, this, [this]() { mostrarMenu(); });
 
     // pantalla completa estilo borderless: Alt+Enter (o Alt+Return) alterna,
-    // Escape sale; también hay un checkbox en Opciones
     QShortcut *atajoFullscreen1 = new QShortcut(QKeySequence("Alt+Return"), this);
     QShortcut *atajoFullscreen2 = new QShortcut(QKeySequence("Alt+Enter"), this);
     connect(atajoFullscreen1, &QShortcut::activated, this, [this]() { setPantallaCompleta(!isFullScreen()); });
@@ -312,8 +310,7 @@ void BuscaminasMain::actualizarMedallas(){
 void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
 {
     cerrarPantallaPartida();
-    // el mute vive dentro de la partida: al entrar se restaura la
-    // preferencia guardada de la cuenta (el menú siempre entra sin mute)
+    // el mute vive dentro de la partida
     aplicarPreferenciaMute(nombreUsuarioActual);
     ventanaJuego = new VentanaJuego(filas, columnas, minas, contenedorPrincipal);
     ventanaJuego->setNombreJugador(nombreUsuarioActual);
@@ -328,8 +325,6 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
                 ventanaVictoria->setProperty("columnasSig", columnasSig);
                 ventanaVictoria->setProperty("minasSig", minasSig);
                 ventanaVictoria->mostrarResultado(segundos, banderas, textoMedalla, haySiguiente);
-                // explícito: currentChanged no siempre dispara (p. ej. dos
-                // victorias seguidas) y la música del juego quedaría sonando
                 gestorAudio->detenerMusica();
                 cerrarPantallaPartida();
                 panelPrincipal->setCurrentWidget(ventanaVictoria);
@@ -342,8 +337,6 @@ void BuscaminasMain::abrirPartida(int filas, int columnas, int minas)
                 ventanaDerrota->setProperty("columnasReintento", columnas);
                 ventanaDerrota->setProperty("minasReintento", minas);
                 ventanaDerrota->mostrarResultado(segundos, banderas);
-                // explícito: en derrotas consecutivas el panel ya muestra
-                // derrota, currentChanged no dispara y la música seguía
                 gestorAudio->detenerMusica();
                 cerrarPantallaPartida();
                 panelPrincipal->setCurrentWidget(ventanaDerrota);
@@ -366,10 +359,7 @@ void BuscaminasMain::cerrarPantallaPartida()
         ventanaJuego->deleteLater();
         ventanaJuego = nullptr;
     }
-    // NOTA: el mute NO se reinicia aquí a propósito: la preferencia se
-    // recuerda entre partidas y por usuario (ver guardar/aplicarPreferenciaMute)
-    // la vista de menús estuvo oculta durante la partida; al volver a
-    // mostrarla se reajusta para que quede centrada y a escala correcta
+
     QTimer::singleShot(0, this, [this]() {
         if (vistaUI) {
             vistaUI->fitInView(QRectF(0, 0, 720, 580), Qt::KeepAspectRatio);
@@ -380,15 +370,13 @@ void BuscaminasMain::cerrarPantallaPartida()
 void BuscaminasMain::mostrarMenu()
 {
     cerrarPantallaPartida();
-    // el menú siempre suena: se quita el mute sin borrar la preferencia
+    // el menú siempre suena, se quita el mute sin borrar la preferencia
     // (al abrir la próxima partida se vuelve a aplicar)
     desmutearSinGuardar();
     actualizarMedallas();
     etiquetaSesion->setText(QString("¡Hola, %1!").arg(nombreUsuarioActual));
     setWindowTitle("Buscaminas - Menú Principal");
-    // la música del menú se retoma aquí y no solo en currentChanged:
-    // al volver de una partida ese signal no dispara (la partida ya no
-    // vive dentro de panelPrincipal) y quedaba sonando la música del juego
+    // la música del menú se retoma aquí y no solo en currentChanged
     gestorAudio->iniciarMusicaMenu();
     panelPrincipal->setCurrentWidget(pantallaMenu);
 }

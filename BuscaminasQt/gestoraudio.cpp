@@ -136,7 +136,6 @@ void GestorAudio::setMuteado(bool silenciado){
         nivelMusicaPreMute = getVolumenMusica();
         nivelEfectosPreMute = getVolumenEfectos();
         // silencio instantáneo: pausar la música y cortar los sfx que
-        // estén sonando (si no, se oye la cola ~2s antes de apagarse)
         musicaPausadaPorMute = (reproductorMusica->playbackState() == QMediaPlayer::PlayingState);
         if (musicaPausadaPorMute) {
             reproductorMusica->pause();
